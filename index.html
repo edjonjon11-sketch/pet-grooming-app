@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pet Grooming Scheduler</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #6759d9;
+      --primary-dark: #5044b7;
+      --primary-light: #efedff;
+      --background: #f5f6fb;
+      --card: #ffffff;
+      --text: #202236;
+      --muted: #70758c;
+      --border: #e3e5ef;
+      --success: #23865d;
+      --success-light: #e5f7ef;
+      --warning: #b56a08;
+      --warning-light: #fff2dc;
+      --danger: #bd3b45;
+      --danger-light: #fdecef;
+      --shadow: 0 10px 30px rgba(41, 43, 75, 0.08);
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--background);
+      color: var(--text);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 620px;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding-bottom: 95px;
+      background: var(--background);
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: 20px 16px 17px;
+      color: white;
+      background: linear-gradient(135deg, #6759d9, #897df0);
+      box-shadow: 0 6px 20px rgba(73, 60, 180, 0.22);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 23px;
+    }
+
+    .header p {
+      margin: 5px 0 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 13px;
+    }
+
+    .date-badge {
+      padding: 8px 11px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.17);
+      font-size: 12px;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .screen {
+      display: none;
+      padding: 16px;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 4px 0 14px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .section-title p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .card {
+      padding: 16px;
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .summary-card {
+      padding: 14px 8px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: white;
+      text-align: center;
+    }
+
+    .summary-number {
+      display: block;
+      font-size: 24px;
+      font-weight: 750;
+      color: var(--primary);
+    }
+
+    .summary-label {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .appointment-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .appointment-card::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 5px;
+      background: var(--primary);
+      content: "";
+    }
+
+    .appointment-card.completed::before {
+      background: var(--success);
+    }
+
+    .appointment-card.cancelled::before {
+      background: var(--danger);
+    }
+
+    .appointment-card.no-show::before {
+      background: var(--warning);
+    }
+
+    .appointment-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding-left: 5px;
+    }
+
+    .appointment-time {
+      min-width: 70px;
+      font-size: 17px;
+      font-weight: 750;
+      color: var(--primary);
+    }
+
+    .appointment-info {
+      flex: 1;
+    }
+
+    .appointment-info h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .appointment-info p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-badge.completed {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .status-badge.cancelled {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .status-badge.no-show {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .appointment-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-top: 14px;
+      padding-left: 5px;
+    }
+
+    .small-btn {
+      min-height: 36px;
+      padding: 8px 11px;
+      border: none;
+      border-radius: 10px;
+      background: #f0f1f6;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .small-btn.success {
+      background: var(--success-light);
+      color: var(--success);
+    }
+
+    .small-btn.warning {
+      background: var(--warning-light);
+      color: var(--warning);
+    }
+
+    .small-btn.danger {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 47px;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      outline: none;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(103, 89, 217, 0.12);
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    .primary-btn {
+      width: 100%;
+      min-height: 51px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 14px;
+      background: var(--primary);
+      color: white;
+      font-weight: 750;
+      box-shadow: 0 8px 16px rgba(103, 89, 217, 0.2);
+    }
+
+    .primary-btn:active {
+      transform: scale(0.99);
+    }
+
+    .secondary-btn {
+      width: 100%;
+      min-height: 47px;
+      padding: 11px 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: white;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .customer-card h3 {
+      margin: 0;
+      font-size: 17px;
+    }
+
+    .customer-card p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .pet-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 13px;
+    }
+
+    .pet-row {
+      padding: 11px;
+      border-radius: 12px;
+      background: #f7f7fb;
+    }
+
+    .pet-row strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .pet-row span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .search-box {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .search-box input {
+      padding-left: 41px;
+    }
+
+    .search-icon {
+      position: absolute;
+      top: 13px;
+      left: 14px;
+      color: var(--muted);
+    }
+
+    .calendar-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .calendar-controls input {
+      flex: 1;
+    }
+
+    .calendar-controls button {
+      padding: 0 14px;
+      border: none;
+      border-radius: 12px;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      padding: 28px 18px;
+      border: 1px dashed #cfd2df;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.6);
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 38px;
+    }
+
+    .empty-state h3 {
+      margin: 10px 0 5px;
+    }
+
+    .empty-state p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      width: 100%;
+      max-width: 620px;
+      margin: auto;
+      padding: 9px 8px max(9px, env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(15px);
+    }
+
+    .nav-btn {
+      min-height: 54px;
+      padding: 5px 3px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .nav-btn .nav-icon {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 20px;
+    }
+
+    .nav-btn.active {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+      font-weight: 750;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 12px;
+      background: rgba(26, 27, 45, 0.52);
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 100%;
+      max-width: 620px;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 18px;
+      border-radius: 22px 22px 15px 15px;
+      background: white;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .close-btn {
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: 50%;
+      background: #f0f1f6;
+      font-size: 20px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .notice {
+      position: fixed;
+      right: 16px;
+      bottom: 92px;
+      left: 16px;
+      z-index: 150;
+      max-width: 585px;
+      margin: auto;
+      padding: 13px 15px;
+      border-radius: 13px;
+      background: #202236;
+      color: white;
+      font-size: 13px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(15px);
+      transition: 0.25s ease;
+    }
+
+    .notice.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .divider {
+      height: 1px;
+      margin: 17px 0;
+      background: var(--border);
+    }
+
+    .helper {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 430px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .summary-grid {
+        gap: 7px;
+      }
+
+      .summary-card {
+        padding: 12px 5px;
+      }
+
+      .appointment-top {
+        flex-wrap: wrap;
+      }
+
+      .status-badge {
+        margin-left: 75px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-top">
+        <div>
+          <h1>🐾 GroomBook</h1>
+          <p>Pet grooming appointments and history</p>
+        </div>
+
+        <div class="date-badge" id="headerDate"></div>
+      </div>
+    </header>
+
+    <!-- TODAY SCREEN -->
+    <section class="screen active" id="todayScreen">
+      <div class="section-title">
+        <div>
+          <h2>Today’s Schedule</h2>
+          <p id="todaySubtitle">Appointments scheduled for today</p>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-card">
+          <span class="summary-number" id="todayTotal">0</span>
+          <span class="summary-label">Appointments</span>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-number" id="todayCompleted">0</span>
+          <span class="summary-label">Completed</span>
+        </div>
+
+        <div class="summary-card">
+          <span class="summary-number" id="todayRemaining">0</span>
+          <span class="summary-label">Remaining</span>
+        </div>
+      </div>
+
+      <div id="todayAppointments"></div>
+    </section>
+
+    <!-- CALENDAR SCREEN -->
+    <section class="screen" id="calendarScreen">
+      <div class="section-title">
+        <div>
+          <h2>Calendar</h2>
+          <p>View appointments for any date</p>
+        </div>
+      </div>
+
+      <div class="calendar-controls">
+        <input type="date" id="calendarDate">
+        <button type="button" id="viewDateBtn">View</button>
+      </div>
+
+      <div id="calendarAppointments"></div>
+    </section>
+
+    <!-- CUSTOMERS SCREEN -->
+    <section class="screen" id="customersScreen">
+      <div class="section-title">
+        <div>
+          <h2>Customers & Pets</h2>
+          <p>Search customer and grooming records</p>
+        </div>
+
+        <button type="button" class="small-btn" id="openCustomerBtn">
+          + Add
+        </button>
+      </div>
+
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="search"
+          id="customerSearch"
+          placeholder="Search owner, pet or telephone..."
+        >
+      </div>
+
+      <div id="customerList"></div>
+    </section>
+
+    <!-- NEW APPOINTMENT SCREEN -->
+    <section class="screen" id="newScreen">
+      <div class="section-title">
+        <div>
+          <h2>New Appointment</h2>
+          <p>Schedule a grooming visit</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <form id="appointmentForm">
+          <input type="hidden" id="appointmentId">
+
+          <div class="form-group">
+            <label for="appointmentCustomer">Customer</label>
+            <select id="appointmentCustomer" required>
+              <option value="">Select a customer</option>
+            </select>
+
+            <div class="helper">
+              Add the customer under Customers & Pets first.
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="appointmentPet">Pet</label>
+            <select id="appointmentPet" required>
+              <option value="">Select a pet</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="appointmentDate">Date</label>
+              <input type="date" id="appointmentDate" required>
+            </div>
+
+            <div class="form-group">
+              <label for="appointmentTime">Time</label>
+              <input type="time" id="appointmentTime" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="appointmentService">Service</label>
+            <select id="appointmentService" required>
+              <option value="">Choose a service</option>
+              <option>Full Groom</option>
+              <option>Bath & Brush</option>
+              <option>Bath & Nail Trim</option>
+              <option>Nail Trim</option>
+              <option>Haircut Only</option>
+              <option>Deshedding Treatment</option>
+              <option>Puppy Groom</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="appointmentGroomer">Groomer</label>
+              <input
+                type="text"
+                id="appointmentGroomer"
+                placeholder="Groomer’s name"
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="appointmentPrice">Estimated Price</label>
+              <input
+                type="number"
+                id="appointmentPrice"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="appointmentNotes">Appointment Notes</label>
+            <textarea
+              id="appointmentNotes"
+              placeholder="Special instructions, haircut request, behavior notes..."
+            ></textarea>
+          </div>
+
+          <button type="submit" class="primary-btn" id="saveAppointmentBtn">
+            Save Appointment
+          </button>
+
+          <button
+            type="button"
+            class="secondary-btn hidden"
+            id="cancelEditBtn"
+            style="margin-top: 10px;"
+          >
+            Cancel Editing
+          </button>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+    <button type="button" class="nav-btn active" data-screen="todayScreen">
+      <span class="nav-icon">📋</span>
+      Today
+    </button>
+
+    <button type="button" class="nav-btn" data-screen="calendarScreen">
+      <span class="nav-icon">📅</span>
+      Calendar
+    </button>
+
+    <button type="button" class="nav-btn" data-screen="customersScreen">
+      <span class="nav-icon">🐶</span>
+      Customers
+    </button>
+
+    <button type="button" class="nav-btn" data-screen="newScreen">
+      <span class="nav-icon">➕</span>
+      Appointment
+    </button>
+  </nav>
+
+  <!-- CUSTOMER MODAL -->
+  <div class="modal" id="customerModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="customerModalTitle">Add Customer & Pet</h2>
+
+        <button type="button" class="close-btn" id="closeCustomerBtn">
+          ×
+        </button>
+      </div>
+
+      <form id="customerForm">
+        <input type="hidden" id="customerId">
+
+        <div class="form-group">
+          <label for="ownerName">Owner’s Name</label>
+          <input
+            type="text"
+            id="ownerName"
+            placeholder="Customer name"
+            required
+          >
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="ownerPhone">Telephone</label>
+            <input
+              type="tel"
+              id="ownerPhone"
+              placeholder="(555) 555-5555"
+              required
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="ownerEmail">Email</label>
+            <input
+              type="email"
+              id="ownerEmail"
+              placeholder="Optional"
+            >
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="form-group">
+          <label for="petName">Pet’s Name</label>
+          <input
+            type="text"
+            id="petName"
+            placeholder="Pet name"
+            required
+          >
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="petBreed">Breed</label>
+            <input
+              type="text"
+              id="petBreed"
+              placeholder="Example: Shih Tzu"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="petWeight">Weight</label>
+            <input
+              type="number"
+              id="petWeight"
+              min="0"
+              placeholder="Pounds"
+            >
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="petHaircut">Preferred Haircut</label>
+          <input
+            type="text"
+            id="petHaircut"
+            placeholder="Example: Number 4 body, round face"
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="petNotes">Pet Notes</label>
+          <textarea
+            id="petNotes"
+            placeholder="Allergies, behavior, medical or grooming notes..."
+          ></textarea>
+        </div>
+
+        <button type="submit" class="primary-btn">
+          Save Customer & Pet
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- CUSTOMER DETAILS MODAL -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Customer Profile</h2>
+
+        <button type="button" class="close-btn" id="closeDetailsBtn">
+          ×
+        </button>
+      </div>
+
+      <div id="customerDetails"></div>
+    </div>
+  </div>
+
+  <div class="notice" id="notice"></div>
+
+  <script>
+    const STORAGE_KEYS = {
+      customers: "groomBookCustomers",
+      appointments: "groomBookAppointments"
+    };
+
+    let customers = loadData(STORAGE_KEYS.customers);
+    let appointments = loadData(STORAGE_KEYS.appointments);
+
+    const screens = document.querySelectorAll(".screen");
+    const navButtons = document.querySelectorAll(".nav-btn");
+
+    const todayAppointments = document.getElementById("todayAppointments");
+    const calendarAppointments = document.getElementById("calendarAppointments");
+    const customerList = document.getElementById("customerList");
+
+    const appointmentForm = document.getElementById("appointmentForm");
+    const appointmentCustomer = document.getElementById("appointmentCustomer");
+    const appointmentPet = document.getElementById("appointmentPet");
+    const appointmentDate = document.getElementById("appointmentDate");
+    const appointmentTime = document.getElementById("appointmentTime");
+    const appointmentService = document.getElementById("appointmentService");
+    const appointmentGroomer = document.getElementById("appointmentGroomer");
+    const appointmentPrice = document.getElementById("appointmentPrice");
+    const appointmentNotes = document.getElementById("appointmentNotes");
+    const appointmentId = document.getElementById("appointmentId");
+    const saveAppointmentBtn = document.getElementById("saveAppointmentBtn");
+    const cancelEditBtn = document.getElementById("cancelEditBtn");
+
+    const customerModal = document.getElementById("customerModal");
+    const detailsModal = document.getElementById("detailsModal");
+    const customerForm = document.getElementById("customerForm");
+    const customerSearch = document.getElementById("customerSearch");
+    const calendarDate = document.getElementById("calendarDate");
+
+    initialize();
+
+    function initialize() {
+      const today = getTodayString();
+
+      appointmentDate.value = today;
+      calendarDate.value = today;
+
+      setHeaderDate();
+      renderAll();
+      attachEvents();
+    }
+
+    function attachEvents() {
+      navButtons.forEach(button => {
+        button.addEventListener("click", () => {
+          showScreen(button.dataset.screen);
+        });
+      });
+
+      document
+        .getElementById("openCustomerBtn")
+        .addEventListener("click", openCustomerModal);
+
+      document
+        .getElementById("closeCustomerBtn")
+        .addEventListener("click", closeCustomerModal);
+
+      document
+        .getElementById("closeDetailsBtn")
+        .addEventListener("click", closeDetailsModal);
+
+      document
+        .getElementById("viewDateBtn")
+        .addEventListener("click", renderCalendarAppointments);
+
+      customerModal.addEventListener("click", event => {
+        if (event.target === customerModal) {
+          closeCustomerModal();
+        }
+      });
+
+      detailsModal.addEventListener("click", event => {
+        if (event.target === detailsModal) {
+          closeDetailsModal();
+        }
+      });
+
+      appointmentCustomer.addEventListener("change", populatePetOptions);
+      appointmentForm.addEventListener("submit", saveAppointment);
+      customerForm.addEventListener("submit", saveCustomer);
+      customerSearch.addEventListener("input", renderCustomers);
+      cancelEditBtn.addEventListener("click", resetAppointmentForm);
+    }
+
+    function loadData(key) {
+      try {
+        const saved = localStorage.getItem(key);
+        return saved ? JSON.parse(saved) : [];
+      } catch (error) {
+        console.error("Unable to load saved data:", error);
+        return [];
+      }
+    }
+
+    function saveAllData() {
+      localStorage.setItem(
+        STORAGE_KEYS.customers,
+        JSON.stringify(customers)
+      );
+
+      localStorage.setItem(
+        STORAGE_KEYS.appointments,
+        JSON.stringify(appointments)
+      );
+    }
+
+    function createId() {
+      return Date.now().toString() +
+        Math.random().toString(16).slice(2);
+    }
+
+    function getTodayString() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    }
+
+    function setHeaderDate() {
+      const now = new Date();
+
+      document.getElementById("headerDate").innerHTML =
+        now.toLocaleDateString("en-US", {
+          weekday: "short",
+          month: "short",
+          day: "numeric"
+        });
+    }
+
+    function showScreen(screenId) {
+      screens.forEach(screen => {
+        screen.classList.toggle("active", screen.id === screenId);
+      });
+
+      navButtons.forEach(button => {
+        button.classList.toggle(
+          "active",
+          button.dataset.screen === screenId
+        );
+      });
+
+      if (screenId === "todayScreen") {
+        renderTodayAppointments();
+      }
+
+      if (screenId === "calendarScreen") {
+        renderCalendarAppointments();
+      }
+
+      if (screenId === "customersScreen") {
+        renderCustomers();
+      }
+
+      if (screenId === "newScreen") {
+        populateCustomerOptions();
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    function renderAll() {
+      populateCustomerOptions();
+      renderTodayAppointments();
+      renderCalendarAppointments();
+      renderCustomers();
+    }
+
+    function populateCustomerOptions() {
+      const currentValue = appointmentCustomer.value;
+
+      appointmentCustomer.innerHTML =
+        '<option value="">Select a customer</option>';
+
+      const sortedCustomers = [...customers].sort((a, b) =>
+        a.ownerName.localeCompare(b.ownerName)
+      );
+
+      sortedCustomers.forEach(customer => {
+        const option = document.createElement("option");
+        option.value = customer.id;
+        option.textContent = `${customer.ownerName} — ${customer.phone}`;
+        appointmentCustomer.appendChild(option);
+      });
+
+      if (customers.some(customer => customer.id === currentValue)) {
+        appointmentCustomer.value = currentValue;
+      }
+
+      populatePetOptions();
+    }
+
+    function populatePetOptions() {
+      const customer = customers.find(
+        item => item.id === appointmentCustomer.value
+      );
+
+      const currentPetValue = appointmentPet.value;
+
+      appointmentPet.innerHTML =
+        '<option value="">Select a pet</option>';
+
+      if (!customer) {
+        return;
+      }
+
+      customer.pets.forEach(pet => {
+        const option = document.createElement("option");
+        option.value = pet.id;
+        option.textContent = pet.name +
+          (pet.breed ? ` — ${pet.breed}` : "");
+
+        appointmentPet.appendChild(option);
+      });
+
+      if (customer.pets.some(pet => pet.id === currentPetValue)) {
+        appointmentPet.value = currentPetValue;
+      }
+    }
+
+    function saveCustomer(event) {
+      event.preventDefault();
+
+      const ownerName = document.getElementById("ownerName").value.trim();
+      const phone = document.getElementById("ownerPhone").value.trim();
+      const email = document.getElementById("ownerEmail").value.trim();
+      const petName = document.getElementById("petName").value.trim();
+      const petBreed = document.getElementById("petBreed").value.trim();
+      const petWeight = document.getElementById("petWeight").value;
+      const petHaircut = document.getElementById("petHaircut").value.trim();
+      const petNotes = document.getElementById("petNotes").value.trim();
+
+      if (!ownerName || !phone || !petName) {
+        showNotice("Please enter the owner, telephone number and pet name.");
+        return;
+      }
+
+      const existingCustomer = customers.find(customer =>
+        normalizePhone(customer.phone) === normalizePhone(phone) &&
+        customer.ownerName.toLowerCase() === ownerName.toLowerCase()
+      );
+
+      const newPet = {
+        id: createId(),
+        name: petName,
+        breed: petBreed,
+        weight: petWeight,
+        haircut: petHaircut,
+        notes: petNotes
+      };
+
+      if (existingCustomer) {
+        existingCustomer.pets.push(newPet);
+        existingCustomer.email = email || existingCustomer.email;
+
+        showNotice("Pet added to the existing customer.");
+      } else {
+        customers.push({
+          id: createId(),
+          ownerName,
+          phone,
+          email,
+          pets: [newPet],
+          createdAt: new Date().toISOString()
+        });
+
+        showNotice("Customer and pet saved.");
+      }
+
+      saveAllData();
+      customerForm.reset();
+      closeCustomerModal();
+      renderAll();
+    }
+
+    function normalizePhone(phone) {
+      return String(phone || "").replace(/\D/g, "");
+    }
+
+    function saveAppointment(event) {
+      event.preventDefault();
+
+      const customerId = appointmentCustomer.value;
+      const petId = appointmentPet.value;
+      const date = appointmentDate.value;
+      const time = appointmentTime.value;
+      const service = appointmentService.value;
+
+      if (!customerId || !petId || !date || !time || !service) {
+        showNotice("Please complete all required appointment information.");
+        return;
+      }
+
+      const editingId = appointmentId.value;
+
+      const duplicate = appointments.find(appointment =>
+        appointment.date === date &&
+        appointment.time === time &&
+        appointment.id !== editingId &&
+        appointment.status !== "Cancelled"
+      );
+
+      if (duplicate) {
+        const proceed = confirm(
+          "Another appointment is already scheduled for this time. Save it anyway?"
+        );
+
+        if (!proceed) {
+          return;
+        }
+      }
+
+      const appointmentData = {
+        id: editingId || createId(),
+        customerId,
+        petId,
+        date,
+        time,
+        service,
+        groomer: appointmentGroomer.value.trim(),
+        price: appointmentPrice.value,
+        notes: appointmentNotes.value.trim(),
+        status: editingId
+          ? appointments.find(item => item.id === editingId)?.status || "Scheduled"
+          : "Scheduled",
+        createdAt: editingId
+          ? appointments.find(item => item.id === editingId)?.createdAt
+          : new Date().toISOString()
+      };
+
+      if (editingId) {
+        const index = appointments.findIndex(
+          appointment => appointment.id === editingId
+        );
+
+        if (index !== -1) {
+          appointments[index] = appointmentData;
+        }
+
+        showNotice("Appointment updated.");
+      } else {
+        appointments.push(appointmentData);
+        showNotice("Appointment scheduled.");
+      }
+
+      saveAllData();
+      resetAppointmentForm();
+      renderAll();
+      showScreen("todayScreen");
+    }
+
+    function renderTodayAppointments() {
+      const today = getTodayString();
+
+      const todaysItems = appointments
+        .filter(appointment => appointment.date === today)
+        .sort(sortAppointments);
+
+      const completed = todaysItems.filter(
+        appointment => appointment.status === "Completed"
+      ).length;
+
+      const remaining = todaysItems.filter(
+        appointment =>
+          appointment.status !== "Completed" &&
+          appointment.status !== "Cancelled" &&
+          appointment.status !== "No Show"
+      ).length;
+
+      document.getElementById("todayTotal").textContent =
+        todaysItems.length;
+
+      document.getElementById("todayCompleted").textContent =
+        completed;
+
+      document.getElementById("todayRemaining").textContent =
+        remaining;
+
+      document.getElementById("todaySubtitle").textContent =
+        formatLongDate(today);
+
+      renderAppointmentList(todaysItems, todayAppointments);
+    }
+
+    function renderCalendarAppointments() {
+      const selectedDate = calendarDate.value || getTodayString();
+
+      const items = appointments
+        .filter(appointment => appointment.date === selectedDate)
+        .sort(sortAppointments);
+
+      if (!items.length) {
+        calendarAppointments.innerHTML = createEmptyState(
+          "📅",
+          "No appointments",
+          `There are no appointments scheduled for ${formatLongDate(selectedDate)}.`
+        );
+
+        return;
+      }
+
+      calendarAppointments.innerHTML = `
+        <div class="section-title">
+          <div>
+            <h2 style="font-size:17px;">${escapeHtml(formatLongDate(selectedDate))}</h2>
+            <p>${items.length} appointment${items.length === 1 ? "" : "s"}</p>
+          </div>
+        </div>
+      `;
+
+      const list = document.createElement("div");
+      calendarAppointments.appendChild(list);
+      renderAppointmentList(items, list);
+    }
+
+    function renderAppointmentList(items, container) {
+      container.innerHTML = "";
+
+      if (!items.length) {
+        container.innerHTML = createEmptyState(
+          "🐾",
+          "No appointments yet",
+          "Press Appointment below to schedule the first grooming visit."
+        );
+
+        return;
+      }
+
+      items.forEach(appointment => {
+        const customer = customers.find(
+          item => item.id === appointment.customerId
+        );
+
+        const pet = customer?.pets.find(
+          item => item.id === appointment.petId
+        );
+
+        const card = document.createElement("div");
+        const statusClass = appointment.status
+          .toLowerCase()
+          .replace(/\s+/g, "-");
+
+        card.className = `card appointment-card ${statusClass}`;
+
+        card.innerHTML = `
+          <div class="appointment-top">
+            <div class="appointment-time">
+              ${escapeHtml(formatTime(appointment.time))}
+            </div>
+
+            <div class="appointment-info">
+              <h3>
+                ${escapeHtml(pet?.name || "Unknown Pet")}
+              </h3>
+
+              <p>
+                ${escapeHtml(customer?.ownerName || "Unknown Customer")}
+                ${customer?.phone ? ` • ${escapeHtml(customer.phone)}` : ""}
+              </p>
+
+              <p>
+                ${escapeHtml(appointment.service)}
+                ${appointment.groomer
+                  ? ` • Groomer: ${escapeHtml(appointment.groomer)}`
+                  : ""}
+              </p>
+
+              ${appointment.price
+                ? `<p><strong>$${escapeHtml(formatMoney(appointment.price))}</strong></p>`
+                : ""}
+
+              ${appointment.notes
+                ? `<p>📝 ${escapeHtml(appointment.notes)}</p>`
+                : ""}
+            </div>
+
+            <span class="status-badge ${statusClass}">
+              ${escapeHtml(appointment.status)}
+            </span>
+          </div>
+
+          <div class="appointment-actions">
+            <button
+              type="button"
+              class="small-btn success"
+              data-action="complete"
+              data-id="${appointment.id}"
+            >
+              Complete
+            </button>
+
+            <button
+              type="button"
+              class="small-btn"
+              data-action="edit"
+              data-id="${appointment.id}"
+            >
+              Edit
+            </button>
+
+            <button
+              type="button"
+              class="small-btn warning"
+              data-action="no-show"
+              data-id="${appointment.id}"
+            >
+              No Show
+            </button>
+
+            <button
+              type="button"
+              class="small-btn danger"
+              data-action="cancel"
+              data-id="${appointment.id}"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="button"
+              class="small-btn danger"
+              data-action="delete"
+              data-id="${appointment.id}"
+            >
+              Delete
+            </button>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      container
+        .querySelectorAll("[data-action]")
+        .forEach(button => {
+          button.addEventListener("click", () => {
+            handleAppointmentAction(
+              button.dataset.action,
+              button.dataset.id
+            );
+          });
+        });
+    }
+
+    function handleAppointmentAction(action, id) {
+      const appointment = appointments.find(item => item.id === id);
+
+      if (!appointment) {
+        return;
+      }
+
+      if (action === "complete") {
+        appointment.status = "Completed";
+        saveAllData();
+        renderAll();
+        showNotice("Appointment marked completed.");
+      }
+
+      if (action === "no-show") {
+        appointment.status = "No Show";
+        saveAllData();
+        renderAll();
+        showNotice("Appointment marked as no-show.");
+      }
+
+      if (action === "cancel") {
+        appointment.status = "Cancelled";
+        saveAllData();
+        renderAll();
+        showNotice("Appointment cancelled.");
+      }
+
+      if (action === "delete") {
+        const confirmed = confirm(
+          "Delete this appointment permanently?"
+        );
+
+        if (!confirmed) {
+          return;
+        }
+
+        appointments = appointments.filter(item => item.id !== id);
+        saveAllData();
+        renderAll();
+        showNotice("Appointment deleted.");
+      }
+
+      if (action === "edit") {
+        editAppointment(id);
+      }
+    }
+
+    function editAppointment(id) {
+      const appointment = appointments.find(item => item.id === id);
+
+      if (!appointment) {
+        return;
+      }
+
+      appointmentId.value = appointment.id;
+      appointmentCustomer.value = appointment.customerId;
+      populatePetOptions();
+      appointmentPet.value = appointment.petId;
+      appointmentDate.value = appointment.date;
+      appointmentTime.value = appointment.time;
+      appointmentService.value = appointment.service;
+      appointmentGroomer.value = appointment.groomer || "";
+      appointmentPrice.value = appointment.price || "";
+      appointmentNotes.value = appointment.notes || "";
+
+      saveAppointmentBtn.textContent = "Update Appointment";
+      cancelEditBtn.classList.remove("hidden");
+
+      showScreen("newScreen");
+    }
+
+    function resetAppointmentForm() {
+      appointmentForm.reset();
+      appointmentId.value = "";
+      appointmentDate.value = getTodayString();
+      saveAppointmentBtn.textContent = "Save Appointment";
+      cancelEditBtn.classList.add("hidden");
+      populateCustomerOptions();
+    }
+
+    function renderCustomers() {
+      const search = customerSearch.value.trim().toLowerCase();
+
+      const filtered = customers
+        .filter(customer => {
+          const customerText = [
+            customer.ownerName,
+            customer.phone,
+            customer.email,
+            ...customer.pets.flatMap(pet => [
+              pet.name,
+              pet.breed,
+              pet.haircut,
+              pet.notes
+            ])
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          return customerText.includes(search);
+        })
+        .sort((a, b) => a.ownerName.localeCompare(b.ownerName));
+
+      customerList.innerHTML = "";
+
+      if (!filtered.length) {
+        customerList.innerHTML = createEmptyState(
+          "🐶",
+          search ? "No matching customers" : "No customers yet",
+          search
+            ? "Try searching with another name, pet or telephone number."
+            : "Add your first customer and pet to begin scheduling."
+        );
+
+        return;
+      }
+
+      filtered.forEach(customer => {
+        const completedVisits = appointments.filter(
+          appointment =>
+            appointment.customerId === customer.id &&
+            appointment.status === "Completed"
+        ).length;
+
+        const card = document.createElement("div");
+        card.className = "card customer-card";
+
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; gap:12px;">
+            <div>
+              <h3>${escapeHtml(customer.ownerName)}</h3>
+              <p>
+                ${escapeHtml(customer.phone)}
+                ${customer.email ? ` • ${escapeHtml(customer.email)}` : ""}
+              </p>
+            </div>
+
+            <span class="status-badge">
+              ${completedVisits} visit${completedVisits === 1 ? "" : "s"}
+            </span>
+          </div>
+
+          <div class="pet-list">
+            ${customer.pets.map(pet => `
+              <div class="pet-row">
+                <strong>🐾 ${escapeHtml(pet.name)}</strong>
+                <span>
+                  ${escapeHtml(pet.breed || "Breed not entered")}
+                  ${pet.weight ? ` • ${escapeHtml(pet.weight)} lbs` : ""}
+                </span>
+
+                ${pet.haircut
+                  ? `<span>Haircut: ${escapeHtml(pet.haircut)}</span>`
+                  : ""}
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="appointment-actions" style="padding-left:0;">
+            <button
+              type="button"
+              class="small-btn"
+              data-view-customer="${customer.id}"
+            >
+              View History
+            </button>
+
+            <button
+              type="button"
+              class="small-btn success"
+              data-book-customer="${customer.id}"
+            >
+              Book Appointment
+            </button>
+
+            <button
+              type="button"
+              class="small-btn danger"
+              data-delete-customer="${customer.id}"
+            >
+              Delete Customer
+            </button>
+          </div>
+        `;
+
+        customerList.appendChild(card);
+      });
+
+      customerList
+        .querySelectorAll("[data-view-customer]")
+        .forEach(button => {
+          button.addEventListener("click", () => {
+            viewCustomerDetails(button.dataset.viewCustomer);
+          });
+        });
+
+      customerList
+        .querySelectorAll("[data-book-customer]")
+        .forEach(button => {
+          button.addEventListener("click", () => {
+            bookForCustomer(button.dataset.bookCustomer);
+          });
+        });
+
+      customerList
+        .querySelectorAll("[data-delete-customer]")
+        .forEach(button => {
+          button.addEventListener("click", () => {
+            deleteCustomer(button.dataset.deleteCustomer);
+          });
+        });
+    }
+
+    function viewCustomerDetails(customerId) {
+      const customer = customers.find(item => item.id === customerId);
+
+      if (!customer) {
+        return;
+      }
+
+      const customerAppointments = appointments
+        .filter(item => item.customerId === customerId)
+        .sort((a, b) => {
+          const first = `${a.date}T${a.time}`;
+          const second = `${b.date}T${b.time}`;
+          return second.localeCompare(first);
+        });
+
+      const details = document.getElementById("customerDetails");
+
+      details.innerHTML = `
+        <div class="card">
+          <h3 style="margin-top:0;">${escapeHtml(customer.ownerName)}</h3>
+          <p style="color:var(--muted); margin-bottom:5px;">
+            📞 ${escapeHtml(customer.phone)}
+          </p>
+
+          ${customer.email
+            ? `<p style="color:var(--muted); margin:0;">✉️ ${escapeHtml(customer.email)}</p>`
+            : ""}
+        </div>
+
+        <h3>Pets</h3>
+
+        ${customer.pets.map(pet => `
+          <div class="card">
+            <h3 style="margin-top:0;">🐾 ${escapeHtml(pet.name)}</h3>
+
+            <p>
+              <strong>Breed:</strong>
+              ${escapeHtml(pet.breed || "Not entered")}
+            </p>
+
+            <p>
+              <strong>Weight:</strong>
+              ${pet.weight ? `${escapeHtml(pet.weight)} lbs` : "Not entered"}
+            </p>
+
+            <p>
+              <strong>Preferred haircut:</strong>
+              ${escapeHtml(pet.haircut || "Not entered")}
+            </p>
+
+            <p>
+              <strong>Notes:</strong>
+              ${escapeHtml(pet.notes || "No notes")}
+            </p>
+          </div>
+        `).join("")}
+
+        <h3>Appointment History</h3>
+
+        ${customerAppointments.length
+          ? customerAppointments.map(appointment => {
+              const pet = customer.pets.find(
+                item => item.id === appointment.petId
+              );
+
+              return `
+                <div class="card">
+                  <div style="display:flex; justify-content:space-between; gap:10px;">
+                    <strong>
+                      ${escapeHtml(formatLongDate(appointment.date))}
+                    </strong>
+
+                    <span class="status-badge ${appointment.status.toLowerCase().replace(/\s+/g, "-")}">
+                      ${escapeHtml(appointment.status)}
+                    </span>
+                  </div>
+
+                  <p style="color:var(--muted);">
+                    ${escapeHtml(formatTime(appointment.time))}
+                    • ${escapeHtml(pet?.name || "Pet")}
+                    • ${escapeHtml(appointment.service)}
+                  </p>
+
+                  ${appointment.notes
+                    ? `<p>📝 ${escapeHtml(appointment.notes)}</p>`
+                    : ""}
+                </div>
+              `;
+            }).join("")
+          : createEmptyState(
+              "📖",
+              "No appointment history",
+              "This customer has not completed a grooming appointment yet."
+            )
+        }
+      `;
+
+      detailsModal.classList.add("open");
+    }
+
+    function bookForCustomer(customerId) {
+      resetAppointmentForm();
+      appointmentCustomer.value = customerId;
+      populatePetOptions();
+
+      const customer = customers.find(item => item.id === customerId);
+
+      if (customer?.pets.length === 1) {
+        appointmentPet.value = customer.pets[0].id;
+      }
+
+      showScreen("newScreen");
+    }
+
+    function deleteCustomer(customerId) {
+      const customer = customers.find(item => item.id === customerId);
+
+      if (!customer) {
+        return;
+      }
+
+      const confirmed = confirm(
+        `Delete ${customer.ownerName} and all associated appointments?`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      customers = customers.filter(item => item.id !== customerId);
+
+      appointments = appointments.filter(
+        appointment => appointment.customerId !== customerId
+      );
+
+      saveAllData();
+      renderAll();
+      showNotice("Customer deleted.");
+    }
+
+    function openCustomerModal() {
+      customerForm.reset();
+      customerModal.classList.add("open");
+    }
+
+    function closeCustomerModal() {
+      customerModal.classList.remove("open");
+    }
+
+    function closeDetailsModal() {
+      detailsModal.classList.remove("open");
+    }
+
+    function sortAppointments(a, b) {
+      return a.time.localeCompare(b.time);
+    }
+
+    function formatTime(time) {
+      if (!time) {
+        return "";
+      }
+
+      const [hourString, minute] = time.split(":");
+      const hour = Number(hourString);
+      const suffix = hour >= 12 ? "PM" : "AM";
+      const displayHour = hour % 12 || 12;
+
+      return `${displayHour}:${minute} ${suffix}`;
+    }
+
+    function formatLongDate(dateString) {
+      if (!dateString) {
+        return "";
+      }
+
+      const [year, month, day] = dateString.split("-").map(Number);
+      const date = new Date(year, month - 1, day);
+
+      return date.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric"
+      });
+    }
+
+    function formatMoney(value) {
+      const number = Number(value);
+
+      if (!Number.isFinite(number)) {
+        return "0.00";
+      }
+
+      return number.toFixed(2);
+    }
+
+    function createEmptyState(icon, title, message) {
+      return `
+        <div class="empty-state">
+          <div class="empty-icon">${icon}</div>
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(message)}</p>
+        </div>
+      `;
+    }
+
+    function showNotice(message) {
+      const notice = document.getElementById("notice");
+
+      notice.textContent = message;
+      notice.classList.add("show");
+
+      clearTimeout(showNotice.timer);
+
+      showNotice.timer = setTimeout(() => {
+        notice.classList.remove("show");
+      }, 2500);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+  </script>
+</body>
+</html>
