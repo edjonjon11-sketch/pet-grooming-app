@@ -920,13 +920,14 @@
   <span id="appointmentTotal">$0.00</span>
 </div>
 
-          <div class="form-group">
-            <label for="appointmentNotes">Appointment Notes</label>
-            <textarea
-              id="appointmentNotes"
-              placeholder="Special instructions, haircut request, behavior notes..."
-            ></textarea>
-          </div>
+<div class="form-group">
+  <label for="appointmentNotes">Appointment Notes</label>
+
+  <textarea
+    id="appointmentNotes"
+    placeholder="Special instructions, haircut request, behavior notes..."
+  ></textarea>
+</div>
 
           <button type="submit" class="primary-btn" id="saveAppointmentBtn">
             Save Appointment
@@ -1277,23 +1278,15 @@ document
         }
       });
 
-      appointmentCustomer.addEventListener("change", () => {
+     appointmentCustomer.addEventListener("change", () => {
   if (appointmentCustomer.value === "__add_new__") {
     appointmentCustomer.value = "";
     openCustomerModal();
     return;
   }
 
-  populatePetOptions();
-});
-
-appointmentPet.addEventListener("change", () => {
-  if (appointmentPet.value === "__add_new_pet__") {
-    appointmentPet.value = "";
-    openPetForSelectedCustomer();
-  }
-});
-      appointmentForm.addEventListener("submit", saveAppointment);
+  renderAppointmentPetChoices();
+});      appointmentForm.addEventListener("submit", saveAppointment);
       customerForm.addEventListener("submit", saveCustomer);
       customerSearch.addEventListener("input", renderCustomers);
       cancelEditBtn.addEventListener("click", resetAppointmentForm);
@@ -1727,77 +1720,96 @@ function formatExtras(extras) {
     }
 
     function saveAppointment(event) {
-      event.preventDefault();
+  event.preventDefault();
 
-      const customerId = appointmentCustomer.value;
-      const petId = appointmentPet.value;
-      const date = appointmentDate.value;
-      const time = appointmentTime.value;
-      const service = appointmentService.value;
+  const customerId = appointmentCustomer.value;
+  const date = appointmentDate.value;
+  const time = appointmentTime.value;
+  const petServices = getSelectedPetServices();
 
-      if (!customerId || !petId || !date || !time || !service) {
-        showNotice("Please complete all required appointment information.");
-        return;
-      }
+  if (!customerId || !date || !time) {
+    showNotice("Select a customer, date and time.");
+    return;
+  }
 
-      const editingId = appointmentId.value;
+  if (!petServices.length) {
+    showNotice("Select at least one pet for this appointment.");
+    return;
+  }
 
-      const duplicate = appointments.find(appointment =>
-        appointment.date === date &&
-        appointment.time === time &&
-        appointment.id !== editingId &&
-        appointment.status !== "Cancelled"
-      );
+  const missingService = petServices.some(item => !item.service);
 
-      if (duplicate) {
-        const proceed = confirm(
-          "Another appointment is already scheduled for this time. Save it anyway?"
-        );
+  if (missingService) {
+    showNotice("Choose a service for every selected pet.");
+    return;
+  }
 
-        if (!proceed) {
-          return;
-        }
-      }
+  const editingId = appointmentId.value;
 
-      const appointmentData = {
-        id: editingId || createId(),
-        customerId,
-        petId,
-        date,
-        time,
-        service,
-        groomer: appointmentGroomer.value.trim(),
-        price: appointmentPrice.value,
-        notes: appointmentNotes.value.trim(),
-        status: editingId
-          ? appointments.find(item => item.id === editingId)?.status || "Scheduled"
-          : "Scheduled",
-        createdAt: editingId
-          ? appointments.find(item => item.id === editingId)?.createdAt
-          : new Date().toISOString()
-      };
+  const duplicate = appointments.find(appointment =>
+    appointment.date === date &&
+    appointment.time === time &&
+    appointment.id !== editingId &&
+    appointment.status !== "Cancelled"
+  );
 
-      if (editingId) {
-        const index = appointments.findIndex(
-          appointment => appointment.id === editingId
-        );
+  if (duplicate) {
+    const proceed = confirm(
+      "Another appointment is already scheduled for this time. Save it anyway?"
+    );
 
-        if (index !== -1) {
-          appointments[index] = appointmentData;
-        }
+    if (!proceed) {
+      return;
+    }
+  }
 
-        showNotice("Appointment updated.");
-      } else {
-        appointments.push(appointmentData);
-        showNotice("Appointment scheduled.");
-      }
+  const existingAppointment = appointments.find(
+    item => item.id === editingId
+  );
 
-      saveAllData();
-      resetAppointmentForm();
-      renderAll();
-      showScreen("todayScreen");
+  const totalPrice = petServices.reduce((sum, item) => {
+    return sum + (Number.parseFloat(item.price) || 0);
+  }, 0);
+
+  const appointmentData = {
+    id: editingId || createId(),
+    customerId,
+    date,
+    time,
+    petServices,
+    totalPrice,
+    groomer: appointmentGroomer.value.trim(),
+    notes: appointmentNotes.value.trim(),
+
+    status: existingAppointment
+      ? existingAppointment.status
+      : "Scheduled",
+
+    createdAt: existingAppointment
+      ? existingAppointment.createdAt
+      : new Date().toISOString()
+  };
+
+  if (editingId) {
+    const index = appointments.findIndex(
+      appointment => appointment.id === editingId
+    );
+
+    if (index !== -1) {
+      appointments[index] = appointmentData;
     }
 
+    showNotice("Appointment updated.");
+  } else {
+    appointments.push(appointmentData);
+    showNotice("Appointment scheduled.");
+  }
+
+  saveAllData();
+  resetAppointmentForm();
+  renderAll();
+  showScreen("todayScreen");
+}
     function renderTodayAppointments() {
       const today = getTodayString();
 
@@ -1863,134 +1875,177 @@ function formatExtras(extras) {
     }
 
     function renderAppointmentList(items, container) {
-      container.innerHTML = "";
+  container.innerHTML = "";
 
-      if (!items.length) {
-        container.innerHTML = createEmptyState(
-          "🐾",
-          "No appointments yet",
-          "Press Appointment below to schedule the first grooming visit."
+  if (!items.length) {
+    container.innerHTML = createEmptyState(
+      "🐾",
+      "No appointments yet",
+      "Press Appointment below to schedule the first grooming visit."
+    );
+
+    return;
+  }
+
+  items.forEach(appointment => {
+    const customer = customers.find(
+      item => item.id === appointment.customerId
+    );
+
+    const petServices =
+      getAppointmentPetServices(appointment);
+
+    const totalPrice = petServices.reduce(
+      (sum, item) =>
+        sum + (Number.parseFloat(item.price) || 0),
+      0
+    );
+
+    const petDetails = petServices.map(item => {
+      const pet = customer?.pets.find(
+        savedPet => savedPet.id === item.petId
+      );
+
+      const extrasText = formatExtras(item.extras);
+
+      return `
+        <div class="history-pet-line">
+          <strong>
+            🐾 ${escapeHtml(pet?.name || "Unknown Pet")}
+          </strong>
+
+          <p>
+            ${escapeHtml(item.service || "Service not entered")}
+            ${item.price !== ""
+              ? ` • $${escapeHtml(formatMoney(item.price))}`
+              : ""}
+          </p>
+
+          ${extrasText
+            ? `<p>Extras: ${escapeHtml(extrasText)}</p>`
+            : ""}
+
+          ${item.notes
+            ? `<p>📝 ${escapeHtml(item.notes)}</p>`
+            : ""}
+        </div>
+      `;
+    }).join("");
+
+    const card = document.createElement("div");
+
+    const statusClass = appointment.status
+      .toLowerCase()
+      .replace(/\s+/g, "-");
+
+    card.className =
+      `card appointment-card ${statusClass}`;
+
+    card.innerHTML = `
+      <div class="appointment-top">
+        <div class="appointment-time">
+          ${escapeHtml(formatTime(appointment.time))}
+        </div>
+
+        <div class="appointment-info">
+          <h3>
+            ${escapeHtml(customer?.ownerName || "Unknown Customer")}
+          </h3>
+
+          <p>
+            ${petServices.length}
+            ${petServices.length === 1 ? "Pet" : "Pets"}
+
+            ${customer?.phone
+              ? ` • ${escapeHtml(customer.phone)}`
+              : ""}
+          </p>
+
+          ${appointment.groomer
+            ? `<p>Groomer: ${escapeHtml(appointment.groomer)}</p>`
+            : ""}
+
+          ${petDetails}
+
+          <p>
+            <strong>
+              Appointment Total:
+              $${escapeHtml(formatMoney(totalPrice))}
+            </strong>
+          </p>
+
+          ${appointment.notes
+            ? `<p>Appointment note: ${escapeHtml(appointment.notes)}</p>`
+            : ""}
+        </div>
+
+        <span class="status-badge ${statusClass}">
+          ${escapeHtml(appointment.status)}
+        </span>
+      </div>
+
+      <div class="appointment-actions">
+        <button
+          type="button"
+          class="small-btn success"
+          data-action="complete"
+          data-id="${appointment.id}"
+        >
+          Complete
+        </button>
+
+        <button
+          type="button"
+          class="small-btn"
+          data-action="edit"
+          data-id="${appointment.id}"
+        >
+          Edit
+        </button>
+
+        <button
+          type="button"
+          class="small-btn warning"
+          data-action="no-show"
+          data-id="${appointment.id}"
+        >
+          No Show
+        </button>
+
+        <button
+          type="button"
+          class="small-btn danger"
+          data-action="cancel"
+          data-id="${appointment.id}"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="small-btn danger"
+          data-action="delete"
+          data-id="${appointment.id}"
+        >
+          Delete
+        </button>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  container
+    .querySelectorAll("[data-action]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        handleAppointmentAction(
+          button.dataset.action,
+          button.dataset.id
         );
-
-        return;
-      }
-
-      items.forEach(appointment => {
-        const customer = customers.find(
-          item => item.id === appointment.customerId
-        );
-
-        const pet = customer?.pets.find(
-          item => item.id === appointment.petId
-        );
-
-        const card = document.createElement("div");
-        const statusClass = appointment.status
-          .toLowerCase()
-          .replace(/\s+/g, "-");
-
-        card.className = `card appointment-card ${statusClass}`;
-
-        card.innerHTML = `
-          <div class="appointment-top">
-            <div class="appointment-time">
-              ${escapeHtml(formatTime(appointment.time))}
-            </div>
-
-            <div class="appointment-info">
-              <h3>
-                ${escapeHtml(pet?.name || "Unknown Pet")}
-              </h3>
-
-              <p>
-                ${escapeHtml(customer?.ownerName || "Unknown Customer")}
-                ${customer?.phone ? ` • ${escapeHtml(customer.phone)}` : ""}
-              </p>
-
-              <p>
-                ${escapeHtml(appointment.service)}
-                ${appointment.groomer
-                  ? ` • Groomer: ${escapeHtml(appointment.groomer)}`
-                  : ""}
-              </p>
-
-              ${appointment.price
-                ? `<p><strong>$${escapeHtml(formatMoney(appointment.price))}</strong></p>`
-                : ""}
-
-              ${appointment.notes
-                ? `<p>📝 ${escapeHtml(appointment.notes)}</p>`
-                : ""}
-            </div>
-
-            <span class="status-badge ${statusClass}">
-              ${escapeHtml(appointment.status)}
-            </span>
-          </div>
-
-          <div class="appointment-actions">
-            <button
-              type="button"
-              class="small-btn success"
-              data-action="complete"
-              data-id="${appointment.id}"
-            >
-              Complete
-            </button>
-
-            <button
-              type="button"
-              class="small-btn"
-              data-action="edit"
-              data-id="${appointment.id}"
-            >
-              Edit
-            </button>
-
-            <button
-              type="button"
-              class="small-btn warning"
-              data-action="no-show"
-              data-id="${appointment.id}"
-            >
-              No Show
-            </button>
-
-            <button
-              type="button"
-              class="small-btn danger"
-              data-action="cancel"
-              data-id="${appointment.id}"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="button"
-              class="small-btn danger"
-              data-action="delete"
-              data-id="${appointment.id}"
-            >
-              Delete
-            </button>
-          </div>
-        `;
-
-        container.appendChild(card);
       });
-
-      container
-        .querySelectorAll("[data-action]")
-        .forEach(button => {
-          button.addEventListener("click", () => {
-            handleAppointmentAction(
-              button.dataset.action,
-              button.dataset.id
-            );
-          });
-        });
-    }
-
+    });
+}
     function handleAppointmentAction(action, id) {
       const appointment = appointments.find(item => item.id === id);
 
@@ -2040,11 +2095,16 @@ function formatExtras(extras) {
     }
 
     function editAppointment(id) {
-  const appointment = appointments.find(item => item.id === id);
+  const appointment = appointments.find(
+    item => item.id === id
+  );
 
   if (!appointment) {
     return;
   }
+
+  resetAppointmentForm();
+  showScreen("newScreen");
 
   appointmentId.value = appointment.id;
   appointmentCustomer.value = appointment.customerId;
@@ -2053,16 +2113,16 @@ function formatExtras(extras) {
   appointmentGroomer.value = appointment.groomer || "";
   appointmentNotes.value = appointment.notes || "";
 
-  const petServices = getAppointmentPetServices(appointment);
+  const petServices =
+    getAppointmentPetServices(appointment);
 
   renderAppointmentPetChoices(petServices);
 
-  saveAppointmentBtn.textContent = "Update Appointment";
+  saveAppointmentBtn.textContent =
+    "Update Appointment";
+
   cancelEditBtn.classList.remove("hidden");
-
-  showScreen("newScreen");
 }
-
     function resetAppointmentForm() {
   appointmentForm.reset();
 
@@ -2323,13 +2383,12 @@ ${pet.extras
     }
 
     function bookForCustomer(customerId) {
-      resetAppointmentForm();
-      appointmentCustomer.value = customerId;
-      renderAppointmentPetChoices();
+  resetAppointmentForm();
+  showScreen("newScreen");
 
-      showScreen("newScreen");
-    }
-
+  appointmentCustomer.value = customerId;
+  renderAppointmentPetChoices();
+}
     function deleteCustomer(customerId) {
       const customer = customers.find(item => item.id === customerId);
 
