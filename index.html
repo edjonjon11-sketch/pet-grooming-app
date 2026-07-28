@@ -185,6 +185,31 @@
       background: var(--warning);
     }
 
+.select-action-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.select-action-row select {
+  min-width: 0;
+}
+
+.add-inline-btn {
+  min-width: 72px;
+  padding: 0 13px;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-weight: 750;
+}
+
+.add-inline-btn:active {
+  transform: scale(0.98);
+}
+    
     .appointment-top {
       display: flex;
       align-items: flex-start;
@@ -1006,6 +1031,18 @@
         });
       });
 
+  document
+  .getElementById("addCustomerFromAppointmentBtn")
+  .addEventListener("click", () => {
+    openCustomerModal();
+  });
+
+document
+  .getElementById("addPetFromAppointmentBtn")
+  .addEventListener("click", () => {
+    openPetForSelectedCustomer();
+  });
+      
       document
         .getElementById("openCustomerBtn")
         .addEventListener("click", openCustomerModal);
@@ -1034,7 +1071,22 @@
         }
       });
 
-      appointmentCustomer.addEventListener("change", populatePetOptions);
+      appointmentCustomer.addEventListener("change", () => {
+  if (appointmentCustomer.value === "__add_new__") {
+    appointmentCustomer.value = "";
+    openCustomerModal();
+    return;
+  }
+
+  populatePetOptions();
+});
+
+appointmentPet.addEventListener("change", () => {
+  if (appointmentPet.value === "__add_new_pet__") {
+    appointmentPet.value = "";
+    openPetForSelectedCustomer();
+  }
+});
       appointmentForm.addEventListener("submit", saveAppointment);
       customerForm.addEventListener("submit", saveCustomer);
       customerSearch.addEventListener("input", renderCustomers);
@@ -1130,56 +1182,67 @@
     }
 
     function populateCustomerOptions() {
-      const currentValue = appointmentCustomer.value;
+  const currentValue = appointmentCustomer.value;
 
-      appointmentCustomer.innerHTML =
-        '<option value="">Select a customer</option>';
+  appointmentCustomer.innerHTML = `
+    <option value="">Select a customer</option>
+    <option value="__add_new__">➕ Add New Customer</option>
+  `;
 
-      const sortedCustomers = [...customers].sort((a, b) =>
-        a.ownerName.localeCompare(b.ownerName)
-      );
+  const sortedCustomers = [...customers].sort((a, b) =>
+    a.ownerName.localeCompare(b.ownerName)
+  );
 
-      sortedCustomers.forEach(customer => {
-        const option = document.createElement("option");
-        option.value = customer.id;
-        option.textContent = `${customer.ownerName} — ${customer.phone}`;
-        appointmentCustomer.appendChild(option);
-      });
+  sortedCustomers.forEach(customer => {
+    const option = document.createElement("option");
+    option.value = customer.id;
+    option.textContent = `${customer.ownerName} — ${customer.phone}`;
+    appointmentCustomer.appendChild(option);
+  });
 
-      if (customers.some(customer => customer.id === currentValue)) {
-        appointmentCustomer.value = currentValue;
-      }
+  if (customers.some(customer => customer.id === currentValue)) {
+    appointmentCustomer.value = currentValue;
+  }
 
-      populatePetOptions();
-    }
+  populatePetOptions();
+}
 
     function populatePetOptions() {
-      const customer = customers.find(
-        item => item.id === appointmentCustomer.value
-      );
+  const customer = customers.find(
+    item => item.id === appointmentCustomer.value
+  );
 
-      const currentPetValue = appointmentPet.value;
+  const currentPetValue = appointmentPet.value;
 
-      appointmentPet.innerHTML =
-        '<option value="">Select a pet</option>';
+  appointmentPet.innerHTML = `
+    <option value="">Select a pet</option>
+  `;
 
-      if (!customer) {
-        return;
-      }
+  if (!customer) {
+    appointmentPet.innerHTML += `
+      <option value="__add_new_pet__">➕ Add New Pet</option>
+    `;
+    return;
+  }
 
-      customer.pets.forEach(pet => {
-        const option = document.createElement("option");
-        option.value = pet.id;
-        option.textContent = pet.name +
-          (pet.breed ? ` — ${pet.breed}` : "");
+  customer.pets.forEach(pet => {
+    const option = document.createElement("option");
+    option.value = pet.id;
+    option.textContent =
+      pet.name + (pet.breed ? ` — ${pet.breed}` : "");
 
-        appointmentPet.appendChild(option);
-      });
+    appointmentPet.appendChild(option);
+  });
 
-      if (customer.pets.some(pet => pet.id === currentPetValue)) {
-        appointmentPet.value = currentPetValue;
-      }
-    }
+  const addPetOption = document.createElement("option");
+  addPetOption.value = "__add_new_pet__";
+  addPetOption.textContent = "➕ Add New Pet";
+  appointmentPet.appendChild(addPetOption);
+
+  if (customer.pets.some(pet => pet.id === currentPetValue)) {
+    appointmentPet.value = currentPetValue;
+  }
+}
 
     function saveCustomer(event) {
       event.preventDefault();
@@ -1860,10 +1923,50 @@
     }
 
     function openCustomerModal() {
-      customerForm.reset();
-      customerModal.classList.add("open");
-    }
+  customerForm.reset();
 
+  document.getElementById("ownerName").readOnly = false;
+  document.getElementById("ownerPhone").readOnly = false;
+  document.getElementById("ownerEmail").readOnly = false;
+
+  document.getElementById("customerModalTitle").textContent =
+    "Add Customer & Pet";
+
+  customerModal.classList.add("open");
+}
+
+function openPetForSelectedCustomer() {
+  const selectedCustomer = customers.find(
+    customer => customer.id === appointmentCustomer.value
+  );
+
+  if (!selectedCustomer) {
+    showNotice("Select a customer first, or add a new customer.");
+    openCustomerModal();
+    return;
+  }
+
+  customerForm.reset();
+
+  document.getElementById("ownerName").value =
+    selectedCustomer.ownerName;
+
+  document.getElementById("ownerPhone").value =
+    selectedCustomer.phone;
+
+  document.getElementById("ownerEmail").value =
+    selectedCustomer.email || "";
+
+  document.getElementById("ownerName").readOnly = true;
+  document.getElementById("ownerPhone").readOnly = true;
+  document.getElementById("ownerEmail").readOnly = true;
+
+  document.getElementById("customerModalTitle").textContent =
+    `Add Pet for ${selectedCustomer.ownerName}`;
+
+  customerModal.classList.add("open");
+}
+    
     function closeCustomerModal() {
       customerModal.classList.remove("open");
     }
