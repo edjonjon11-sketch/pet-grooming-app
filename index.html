@@ -753,7 +753,8 @@
   <div class="helper">
   Select an existing pet or add a new customer and pet.
 </div>
-
+</div>
+  
 <div class="form-row">
 
   <div class="form-group">
@@ -1343,8 +1344,10 @@ appointmentPet.addEventListener("change", () => {
       const petName = document.getElementById("petName").value.trim();
       const petBreed = document.getElementById("petBreed").value.trim();
       const petWeight = document.getElementById("petWeight").value;
-      const petHaircut = document.getElementById("petHaircut").value.trim();
-      const petNotes = document.getElementById("petNotes").value.trim();
+      const petHaircut = document.getElementById("petHaircut").value;
+const petHairLength = document.getElementById("petHairLength").value;
+const petExtras = document.getElementById("petExtras").value;
+const petNotes = document.getElementById("petNotes").value.trim();
 
       if (!ownerName || !phone || !petName) {
         showNotice("Please enter the owner, telephone number and pet name.");
