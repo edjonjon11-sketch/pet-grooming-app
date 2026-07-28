@@ -612,7 +612,101 @@
       .status-badge {
         margin-left: 75px;
       }
-    }
+
+      .appointment-pets-list {
+  display: grid;
+  gap: 12px;
+}
+
+.appointment-pet-card {
+  padding: 13px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fafafe;
+}
+
+.appointment-pet-card.selected {
+  border-color: var(--primary);
+  background: #f3efff;
+}
+
+.pet-select-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-weight: 800;
+}
+
+.pet-select-heading input {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+.pet-service-fields {
+  display: none;
+}
+
+.appointment-pet-card.selected .pet-service-fields {
+  display: block;
+}
+
+.appointment-total-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0 16px;
+  padding: 14px;
+  border-radius: 13px;
+  background: #f1edff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.pet-extra-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.pet-extra-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  margin: 0;
+  border-radius: 10px;
+  background: white;
+  font-size: 12px;
+}
+
+.pet-extra-option input {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+}
+
+.history-pet-line {
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.history-pet-line:first-of-type {
+  border-top: 0;
+}
+
+@media (max-width: 430px) {
+  .pet-extra-grid {
+    grid-template-columns: 1fr;
+  }
+}
+      
   </style>
 </head>
 
@@ -733,13 +827,28 @@
 </div>
 
 <div class="form-group">
-  <label for="appointmentPet">Pet</label>
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+    <label style="margin:0;">Pets & Services</label>
 
-  <div class="select-action-row">
-    <select id="appointmentPet" required>
-      <option value="">Select a pet</option>
-      <option value="__add_new_pet__">➕ Add New Pet</option>
-    </select>
+    <button
+      type="button"
+      class="add-inline-btn"
+      id="addPetFromAppointmentBtn"
+    >
+      + Add Pet
+    </button>
+  </div>
+
+  <div class="helper" style="margin-bottom:10px;">
+    Select every pet coming in. Enter each pet’s service, extras and price.
+  </div>
+
+  <div id="appointmentPetsContainer" class="appointment-pets-list">
+    <div class="helper">
+      Select a customer to see their pets.
+    </div>
+  </div>
+</div>
 
     <button
       type="button"
@@ -805,6 +914,11 @@
               >
             </div>
           </div>
+
+      <div class="appointment-total-box">
+  <span>Appointment Total</span>
+  <span id="appointmentTotal">$0.00</span>
+</div>
 
           <div class="form-group">
             <label for="appointmentNotes">Appointment Notes</label>
@@ -1082,10 +1196,8 @@
     const todayAppointments = document.getElementById("todayAppointments");
     const calendarAppointments = document.getElementById("calendarAppointments");
     const customerList = document.getElementById("customerList");
-
     const appointmentForm = document.getElementById("appointmentForm");
-    const appointmentCustomer = document.getElementById("appointmentCustomer");
-    const appointmentPet = document.getElementById("appointmentPet");
+    const appointmentCustomer = document.getElementById("appointment
     const appointmentDate = document.getElementById("appointmentDate");
     const appointmentTime = document.getElementById("appointmentTime");
     const appointmentService = document.getElementById("appointmentService");
@@ -1102,6 +1214,12 @@
     const customerSearch = document.getElementById("customerSearch");
     const calendarDate = document.getElementById("calendarDate");
 
+    const appointmentPetsContainer =
+  document.getElementById("appointmentPetsContainer");
+
+const appointmentTotal =
+  document.getElementById("appointmentTotal");
+    
     initialize();
 
     function initialize() {
@@ -1295,46 +1413,259 @@ appointmentPet.addEventListener("change", () => {
     appointmentCustomer.value = currentValue;
   }
 
-  populatePetOptions();
+  renderAppointmentPetChoices();
 }
 
-    function populatePetOptions() {
+    function renderAppointmentPetChoices(selectedServices = []) {
   const customer = customers.find(
     item => item.id === appointmentCustomer.value
   );
 
-  const currentPetValue = appointmentPet.value;
-
-  appointmentPet.innerHTML = `
-    <option value="">Select a pet</option>
-  `;
-
   if (!customer) {
-    appointmentPet.innerHTML += `
-      <option value="__add_new_pet__">➕ Add New Pet</option>
+    appointmentPetsContainer.innerHTML = `
+      <div class="helper">
+        Select a customer to see their pets.
+      </div>
     `;
+
+    updateAppointmentTotal();
     return;
   }
 
-  customer.pets.forEach(pet => {
-    const option = document.createElement("option");
-    option.value = pet.id;
-    option.textContent =
-      pet.name + (pet.breed ? ` — ${pet.breed}` : "");
+  if (!customer.pets || !customer.pets.length) {
+    appointmentPetsContainer.innerHTML = `
+      <div class="helper">
+        This customer has no pets yet. Press Add Pet.
+      </div>
+    `;
 
-    appointmentPet.appendChild(option);
-  });
-
-  const addPetOption = document.createElement("option");
-  addPetOption.value = "__add_new_pet__";
-  addPetOption.textContent = "➕ Add New Pet";
-  appointmentPet.appendChild(addPetOption);
-
-  if (customer.pets.some(pet => pet.id === currentPetValue)) {
-    appointmentPet.value = currentPetValue;
+    updateAppointmentTotal();
+    return;
   }
+
+  appointmentPetsContainer.innerHTML = customer.pets.map(pet => {
+    const saved =
+      selectedServices.find(item => item.petId === pet.id) || {};
+
+    const checked = Boolean(saved.petId);
+
+    const selectedExtras = Array.isArray(saved.extras)
+      ? saved.extras
+      : String(saved.extras || "")
+          .split(",")
+          .map(item => item.trim())
+          .filter(Boolean);
+
+    const extraChoices = [
+      "Nail Trim",
+      "Nail Grinding",
+      "Ear Cleaning",
+      "Teeth Brushing",
+      "Anal Gland Service",
+      "Deshedding",
+      "Flea Treatment",
+      "Medicated Shampoo"
+    ];
+
+    return `
+      <div
+        class="appointment-pet-card ${checked ? "selected" : ""}"
+        data-pet-card="${pet.id}"
+      >
+        <label class="pet-select-heading">
+          <input
+            type="checkbox"
+            class="appointment-pet-check"
+            data-pet-id="${pet.id}"
+            ${checked ? "checked" : ""}
+          >
+
+          <span>
+            🐾 ${escapeHtml(pet.name)}
+            ${pet.breed
+              ? ` — ${escapeHtml(pet.breed)}`
+              : ""}
+          </span>
+        </label>
+
+        <div class="pet-service-fields">
+          <div class="form-group">
+            <label>Service</label>
+
+            <select class="pet-service">
+              <option value="">Choose a service</option>
+
+              ${[
+                "Full Groom",
+                "Bath & Brush",
+                "Bath & Nail Trim",
+                "Nail Trim",
+                "Haircut Only",
+                "Deshedding Treatment",
+                "Puppy Groom",
+                "Other"
+              ].map(service => `
+                <option
+                  value="${service}"
+                  ${saved.service === service ? "selected" : ""}
+                >
+                  ${service}
+                </option>
+              `).join("")}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Price</label>
+
+            <input
+              class="pet-price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              value="${escapeHtml(saved.price || "")}"
+            >
+          </div>
+
+          <div class="form-group">
+            <label>Grooming Extras</label>
+
+            <div class="pet-extra-grid">
+              ${extraChoices.map(extra => `
+                <label class="pet-extra-option">
+                  <input
+                    type="checkbox"
+                    class="pet-extra-check"
+                    value="${extra}"
+                    ${selectedExtras.includes(extra)
+                      ? "checked"
+                      : ""}
+                  >
+
+                  ${extra}
+                </label>
+              `).join("")}
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Pet Instructions</label>
+
+            <textarea
+              class="pet-appointment-notes"
+              placeholder="Haircut request or special instructions..."
+            >${escapeHtml(saved.notes || "")}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  appointmentPetsContainer
+    .querySelectorAll(".appointment-pet-check")
+    .forEach(check => {
+      check.addEventListener("change", () => {
+        const card = check.closest(".appointment-pet-card");
+
+        card.classList.toggle(
+          "selected",
+          check.checked
+        );
+
+        updateAppointmentTotal();
+      });
+    });
+
+  appointmentPetsContainer
+    .querySelectorAll(".pet-price")
+    .forEach(input => {
+      input.addEventListener(
+        "input",
+        updateAppointmentTotal
+      );
+    });
+
+  updateAppointmentTotal();
 }
 
+function getSelectedPetServices() {
+  return Array.from(
+    appointmentPetsContainer.querySelectorAll(
+      ".appointment-pet-card"
+    )
+  )
+    .filter(card =>
+      card.querySelector(
+        ".appointment-pet-check"
+      )?.checked
+    )
+    .map(card => {
+      const extras = Array.from(
+        card.querySelectorAll(
+          ".pet-extra-check:checked"
+        )
+      ).map(input => input.value);
+
+      return {
+        petId: card.dataset.petCard,
+
+        service:
+          card.querySelector(".pet-service")?.value || "",
+
+        price:
+          card.querySelector(".pet-price")?.value || "",
+
+        extras,
+
+        notes:
+          card.querySelector(
+            ".pet-appointment-notes"
+          )?.value.trim() || ""
+      };
+    });
+}
+
+function getAppointmentPetServices(appointment) {
+  if (Array.isArray(appointment.petServices)) {
+    return appointment.petServices;
+  }
+
+  // Keeps older single-pet appointments working.
+  if (appointment.petId) {
+    return [{
+      petId: appointment.petId,
+      service: appointment.service || "",
+      price: appointment.price || "",
+      extras: [],
+      notes: appointment.notes || ""
+    }];
+  }
+
+  return [];
+}
+
+function updateAppointmentTotal() {
+  const total = getSelectedPetServices().reduce(
+    (sum, item) => {
+      return sum +
+        (Number.parseFloat(item.price) || 0);
+    },
+    0
+  );
+
+  appointmentTotal.textContent =
+    `$${formatMoney(total)}`;
+}
+
+function formatExtras(extras) {
+  if (Array.isArray(extras)) {
+    return extras.join(", ");
+  }
+
+  return String(extras || "");
+}
+    
     function saveCustomer(event) {
       event.preventDefault();
 
@@ -1345,9 +1676,9 @@ appointmentPet.addEventListener("change", () => {
       const petBreed = document.getElementById("petBreed").value.trim();
       const petWeight = document.getElementById("petWeight").value;
       const petHaircut = document.getElementById("petHaircut").value;
-const petHairLength = document.getElementById("petHairLength").value;
-const petExtras = document.getElementById("petExtras").value;
-const petNotes = document.getElementById("petNotes").value.trim();
+      const petHairLength = document.getElementById("petHairLength").value;
+      const petExtras = document.getElementById("petExtras").value;
+      const petNotes = document.getElementById("petNotes").value.trim();
 
       if (!ownerName || !phone || !petName) {
         showNotice("Please enter the owner, telephone number and pet name.");
@@ -1712,37 +2043,46 @@ const petNotes = document.getElementById("petNotes").value.trim();
     }
 
     function editAppointment(id) {
-      const appointment = appointments.find(item => item.id === id);
+  const appointment = appointments.find(item => item.id === id);
 
-      if (!appointment) {
-        return;
-      }
+  if (!appointment) {
+    return;
+  }
 
-      appointmentId.value = appointment.id;
-      appointmentCustomer.value = appointment.customerId;
-      populatePetOptions();
-      appointmentPet.value = appointment.petId;
-      appointmentDate.value = appointment.date;
-      appointmentTime.value = appointment.time;
-      appointmentService.value = appointment.service;
-      appointmentGroomer.value = appointment.groomer || "";
-      appointmentPrice.value = appointment.price || "";
-      appointmentNotes.value = appointment.notes || "";
+  appointmentId.value = appointment.id;
+  appointmentCustomer.value = appointment.customerId;
+  appointmentDate.value = appointment.date;
+  appointmentTime.value = appointment.time;
+  appointmentGroomer.value = appointment.groomer || "";
+  appointmentNotes.value = appointment.notes || "";
 
-      saveAppointmentBtn.textContent = "Update Appointment";
-      cancelEditBtn.classList.remove("hidden");
+  const petServices = getAppointmentPetServices(appointment);
 
-      showScreen("newScreen");
-    }
+  renderAppointmentPetChoices(petServices);
+
+  saveAppointmentBtn.textContent = "Update Appointment";
+  cancelEditBtn.classList.remove("hidden");
+
+  showScreen("newScreen");
+}
 
     function resetAppointmentForm() {
-      appointmentForm.reset();
-      appointmentId.value = "";
-      appointmentDate.value = getTodayString();
-      saveAppointmentBtn.textContent = "Save Appointment";
-      cancelEditBtn.classList.add("hidden");
-      populateCustomerOptions();
-    }
+  appointmentForm.reset();
+
+  appointmentId.value = "";
+  appointmentDate.value = getTodayString();
+
+  saveAppointmentBtn.textContent = "Save Appointment";
+  cancelEditBtn.classList.add("hidden");
+
+  appointmentPetsContainer.innerHTML = `
+    <div class="helper">
+      Select a customer to see their pets.
+    </div>
+  `;
+
+  appointmentTotal.textContent = "$0.00";
+}
 
     function renderCustomers() {
       const search = customerSearch.value.trim().toLowerCase();
@@ -1988,13 +2328,7 @@ ${pet.extras
     function bookForCustomer(customerId) {
       resetAppointmentForm();
       appointmentCustomer.value = customerId;
-      populatePetOptions();
-
-      const customer = customers.find(item => item.id === customerId);
-
-      if (customer?.pets.length === 1) {
-        appointmentPet.value = customer.pets[0].id;
-      }
+      renderAppointmentPetChoices();
 
       showScreen("newScreen");
     }
