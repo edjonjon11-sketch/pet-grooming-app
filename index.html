@@ -1360,13 +1360,15 @@ const petNotes = document.getElementById("petNotes").value.trim();
       );
 
       const newPet = {
-        id: createId(),
-        name: petName,
-        breed: petBreed,
-        weight: petWeight,
-        haircut: petHaircut,
-        notes: petNotes
-      };
+  id: createId(),
+  name: petName,
+  breed: petBreed,
+  weight: petWeight,
+  haircut: petHaircut,
+  hairLength: petHairLength,
+  extras: petExtras,
+  notes: petNotes
+};
 
       if (existingCustomer) {
         existingCustomer.pets.push(newPet);
