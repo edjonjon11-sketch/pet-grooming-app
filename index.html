@@ -796,156 +796,127 @@
 
     <!-- NEW APPOINTMENT SCREEN -->
     <section class="screen" id="newScreen">
-      <div class="section-title">
-        <div>
-          <h2>New Appointment</h2>
-          <p>Schedule a grooming visit</p>
-        </div>
-      </div>
-
-      <div class="card">
-        <form id="appointmentForm">
-          <input type="hidden" id="appointmentId">
-
-          <div class="form-group">
-  <label for="appointmentCustomer">Customer</label>
-
-  <div class="select-action-row">
-    <select id="appointmentCustomer" required>
-      <option value="">Select a customer</option>
-      <option value="__add_new__">➕ Add New Customer</option>
-    </select>
-
-    <button
-      type="button"
-      class="add-inline-btn"
-      id="addCustomerFromAppointmentBtn"
-    >
-      + Add
-    </button>
-  </div>
-</div>
-
-<div class="form-group">
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
-    <label style="margin:0;">Pets & Services</label>
-
-    <button
-      type="button"
-      class="add-inline-btn"
-      id="addPetFromAppointmentBtn"
-    >
-      + Add Pet
-    </button>
-  </div>
-
-  <div class="helper" style="margin-bottom:10px;">
-    Select every pet coming in. Enter each pet’s service, extras and price.
-  </div>
-
-  <div id="appointmentPetsContainer" class="appointment-pets-list">
-    <div class="helper">
-      Select a customer to see their pets.
+  <div class="section-title">
+    <div>
+      <h2>New Appointment</h2>
+      <p>Schedule a grooming visit</p>
     </div>
   </div>
-</div>
 
-    <button
-      type="button"
-      class="add-inline-btn"
-      id="addPetFromAppointmentBtn"
-    >
-      + Add
-    </button>
-  </div>
+  <div class="card">
+    <form id="appointmentForm">
+      <input type="hidden" id="appointmentId">
 
-  <div class="helper">
-  Select an existing pet or add a new customer and pet.
-</div>
-</div>
-  
-<div class="form-row">
+      <div class="form-group">
+        <label for="appointmentCustomer">Customer</label>
 
-  <div class="form-group">
-    <label for="appointmentDate">Date</label>
-    <input type="date" id="appointmentDate" required>
-  </div>
-
-  <div class="form-group">
-    <label for="appointmentTime">Time</label>
-    <input type="time" id="appointmentTime" required>
-  </div>
-
-</div>
-
-          <div class="form-group">
-            <label for="appointmentService">Service</label>
-            <select id="appointmentService" required>
-              <option value="">Choose a service</option>
-              <option>Full Groom</option>
-              <option>Bath & Brush</option>
-              <option>Bath & Nail Trim</option>
-              <option>Nail Trim</option>
-              <option>Haircut Only</option>
-              <option>Deshedding Treatment</option>
-              <option>Puppy Groom</option>
-              <option>Other</option>
-            </select>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="appointmentGroomer">Groomer</label>
-              <input
-                type="text"
-                id="appointmentGroomer"
-                placeholder="Groomer’s name"
-              >
-            </div>
-
-            <div class="form-group">
-              <label for="appointmentPrice">Estimated Price</label>
-              <input
-                type="number"
-                id="appointmentPrice"
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-              >
-            </div>
-          </div>
-
-      <div class="appointment-total-box">
-  <span>Appointment Total</span>
-  <span id="appointmentTotal">$0.00</span>
-</div>
-
-<div class="form-group">
-  <label for="appointmentNotes">Appointment Notes</label>
-
-  <textarea
-    id="appointmentNotes"
-    placeholder="Special instructions, haircut request, behavior notes..."
-  ></textarea>
-</div>
-
-          <button type="submit" class="primary-btn" id="saveAppointmentBtn">
-            Save Appointment
-          </button>
+        <div class="select-action-row">
+          <select id="appointmentCustomer" required>
+            <option value="">Select a customer</option>
+            <option value="__add_new__">➕ Add New Customer</option>
+          </select>
 
           <button
             type="button"
-            class="secondary-btn hidden"
-            id="cancelEditBtn"
-            style="margin-top: 10px;"
+            class="add-inline-btn"
+            id="addCustomerFromAppointmentBtn"
           >
-            Cancel Editing
+            + Add
           </button>
-        </form>
+        </div>
       </div>
-    </section>
-  </div>
 
+      <div class="form-group">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+          <label style="margin:0;">Pets & Services</label>
+
+          <button
+            type="button"
+            class="add-inline-btn"
+            id="addPetFromAppointmentBtn"
+          >
+            + Add Pet
+          </button>
+        </div>
+
+        <div class="helper" style="margin-bottom:10px;">
+          Select every pet coming in. Enter a separate service, price and extras for each pet.
+        </div>
+
+        <div
+          id="appointmentPetsContainer"
+          class="appointment-pets-list"
+        >
+          <div class="helper">
+            Select a customer to see their pets.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="appointmentDate">Date</label>
+          <input
+            type="date"
+            id="appointmentDate"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="appointmentTime">Time</label>
+          <input
+            type="time"
+            id="appointmentTime"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="appointmentGroomer">Groomer</label>
+
+        <input
+          type="text"
+          id="appointmentGroomer"
+          placeholder="Groomer’s name"
+        >
+      </div>
+
+      <div class="appointment-total-box">
+        <span>Appointment Total</span>
+        <span id="appointmentTotal">$0.00</span>
+      </div>
+
+      <div class="form-group">
+        <label for="appointmentNotes">Appointment Notes</label>
+
+        <textarea
+          id="appointmentNotes"
+          placeholder="Special instructions, haircut request, behavior notes..."
+        ></textarea>
+      </div>
+
+      <button
+        type="submit"
+        class="primary-btn"
+        id="saveAppointmentBtn"
+      >
+        Save Appointment
+      </button>
+
+      <button
+        type="button"
+        class="secondary-btn hidden"
+        id="cancelEditBtn"
+        style="margin-top:10px;"
+      >
+        Cancel Editing
+      </button>
+    </form>
+  </div>
+</section>
+    
   <!-- BOTTOM NAVIGATION -->
   <nav class="bottom-nav">
     <button type="button" class="nav-btn active" data-screen="todayScreen">
