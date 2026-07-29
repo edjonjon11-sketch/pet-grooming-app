@@ -706,6 +706,307 @@
     grid-template-columns: 1fr;
   }
 }
+
+}
+
+/* UPCOMING APPOINTMENTS, CAPACITY AND REPORTS */
+
+.today-tools {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.capacity-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: white;
+}
+
+.capacity-summary strong {
+  display: block;
+  font-size: 14px;
+}
+
+.capacity-summary p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.capacity-badge {
+  display: inline-block;
+  flex-shrink: 0;
+  padding: 6px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.capacity-badge.available {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.capacity-badge.almost {
+  background: var(--warning-light);
+  color: var(--warning);
+}
+
+.capacity-badge.full {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.capacity-badge.closed {
+  background: #ececf2;
+  color: #5c6072;
+}
+
+.upcoming-preview-card {
+  max-height: 500px;
+  overflow: hidden;
+}
+
+.upcoming-row,
+.opening-row {
+  display: grid;
+  grid-template-columns: 82px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+
+.upcoming-row:first-child,
+.opening-row:first-child {
+  border-top: none;
+}
+
+.upcoming-date {
+  color: var(--primary-dark);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.upcoming-main strong {
+  display: block;
+  font-size: 14px;
+}
+
+.upcoming-main span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.section-link {
+  padding: 7px 3px;
+  border: none;
+  background: transparent;
+  color: var(--primary-dark);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.count-note {
+  margin: 12px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.availability-box {
+  margin: 0 0 15px;
+  padding: 13px;
+  border-radius: 13px;
+  background: #f7f7fb;
+}
+
+.availability-box strong {
+  display: block;
+  font-size: 14px;
+}
+
+.availability-box span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 13px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.filter-chip {
+  flex: 0 0 auto;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: white;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.filter-chip.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.upcoming-full-list {
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.upcoming-date-group {
+  margin-bottom: 18px;
+}
+
+.upcoming-date-title {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: 4px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: #f0effa;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.weekday-grid {
+  display: grid;
+  gap: 9px;
+}
+
+.weekday-row {
+  display: grid;
+  grid-template-columns: 92px 1fr auto;
+  gap: 9px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.weekday-row input[type="number"] {
+  min-height: 40px;
+}
+
+.closed-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.closed-label input {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.report-stat {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fafafe;
+}
+
+.report-stat strong {
+  display: block;
+  color: var(--primary);
+  font-size: 22px;
+}
+
+.report-stat span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.report-table-wrap {
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+  padding: 10px 7px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  text-align: left;
+}
+
+.report-table th:nth-child(n + 2),
+.report-table td:nth-child(n + 2) {
+  text-align: right;
+}
+
+.back-screen-btn {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+@media (max-width: 430px) {
+  .upcoming-row,
+  .opening-row {
+    grid-template-columns: 72px 1fr;
+  }
+
+  .upcoming-row > :last-child,
+  .opening-row > :last-child {
+    grid-column: 2;
+  }
+
+  .weekday-row {
+    grid-template-columns: 76px 1fr;
+  }
+
+  .weekday-row .closed-label {
+    grid-column: 2;
+  }
+}
       
   </style>
 </head>
@@ -726,11 +1027,29 @@
     <!-- TODAY SCREEN -->
     <section class="screen active" id="todayScreen">
       <div class="section-title">
-        <div>
-          <h2>Today’s Schedule</h2>
-          <p id="todaySubtitle">Appointments scheduled for today</p>
-        </div>
-      </div>
+  <div>
+    <h2>Today’s Schedule</h2>
+    <p id="todaySubtitle">Appointments scheduled for today</p>
+  </div>
+
+  <div class="today-tools">
+    <button
+      type="button"
+      class="small-btn"
+      id="openReportsBtn"
+    >
+      Reports
+    </button>
+
+    <button
+      type="button"
+      class="small-btn"
+      id="openCapacityBtn"
+    >
+      Capacity
+    </button>
+  </div>
+</div>
 
       <div class="summary-grid">
         <div class="summary-card">
@@ -749,7 +1068,40 @@
         </div>
       </div>
 
-      <div id="todayAppointments"></div>
+      <div id="todayCapacity"></div>
+
+<div id="todayAppointments"></div>
+
+<div class="section-title" style="margin-top:24px;">
+  <div>
+    <h2 style="font-size:18px;">Upcoming Appointments</h2>
+    <p id="upcomingPreviewSubtitle">
+      Your next scheduled visits
+    </p>
+  </div>
+
+  <button
+    type="button"
+    class="section-link"
+    id="viewAllUpcomingBtn"
+  >
+    View All
+  </button>
+</div>
+
+<div
+  class="card upcoming-preview-card"
+  id="upcomingPreview"
+></div>
+
+<div class="section-title" style="margin-top:24px;">
+  <div>
+    <h2 style="font-size:18px;">Next Available Days</h2>
+    <p>Upcoming dates that still have openings</p>
+  </div>
+</div>
+
+<div class="card" id="nextOpenings"></div>
     </section>
 
     <!-- CALENDAR SCREEN -->
@@ -915,6 +1267,93 @@
       </button>
     </form>
   </div>
+</section>
+
+<!-- ALL UPCOMING APPOINTMENTS SCREEN -->
+<section class="screen" id="upcomingScreen">
+  <div class="section-title">
+    <div>
+      <h2>Upcoming Appointments</h2>
+      <p>Search and view future appointments</p>
+    </div>
+
+    <button
+      type="button"
+      class="back-screen-btn"
+      id="backFromUpcomingBtn"
+    >
+      ← Today
+    </button>
+  </div>
+
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+
+    <input
+      type="search"
+      id="upcomingSearch"
+      placeholder="Search customer, pet, phone or service..."
+    >
+  </div>
+
+  <div class="filter-chips">
+    <button
+      type="button"
+      class="filter-chip active"
+      data-upcoming-days="7"
+    >
+      Next 7 Days
+    </button>
+
+    <button
+      type="button"
+      class="filter-chip"
+      data-upcoming-days="14"
+    >
+      Next 14 Days
+    </button>
+
+    <button
+      type="button"
+      class="filter-chip"
+      data-upcoming-days="30"
+    >
+      Next 30 Days
+    </button>
+
+    <button
+      type="button"
+      class="filter-chip"
+      data-upcoming-days="all"
+    >
+      All Upcoming
+    </button>
+  </div>
+
+  <div
+    class="upcoming-full-list"
+    id="allUpcomingAppointments"
+  ></div>
+</section>
+
+<!-- REPORTS SCREEN -->
+<section class="screen" id="reportsScreen">
+  <div class="section-title">
+    <div>
+      <h2>Monthly Reports</h2>
+      <p>This month compared with last month</p>
+    </div>
+
+    <button
+      type="button"
+      class="back-screen-btn"
+      id="backFromReportsBtn"
+    >
+      ← Today
+    </button>
+  </div>
+
+  <div id="reportsContent"></div>
 </section>
     
   <!-- BOTTOM NAVIGATION -->
@@ -1151,16 +1590,79 @@
     </div>
   </div>
 
+<!-- CAPACITY SETTINGS MODAL -->
+<div class="modal" id="capacityModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2>Daily Capacity</h2>
+        <p
+          style="
+            margin:4px 0 0;
+            color:var(--muted);
+            font-size:12px;
+          "
+        >
+          Choose how appointments count toward the daily limit.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="close-btn"
+        id="closeCapacityBtn"
+      >
+        ×
+      </button>
+    </div>
+
+    <form id="capacityForm">
+      <div class="form-group">
+        <label for="capacityMode">Capacity Based On</label>
+
+        <select id="capacityMode">
+          <option value="pets">
+            Number of Pets
+          </option>
+
+          <option value="appointments">
+            Number of Appointments
+          </option>
+        </select>
+
+        <div class="helper">
+          Pet capacity is recommended because one appointment may contain several pets.
+        </div>
+      </div>
+
+      <div class="weekday-grid" id="weekdaySettings"></div>
+
+      <button
+        type="submit"
+        class="primary-btn"
+        style="margin-top:16px;"
+      >
+        Save Capacity Settings
+      </button>
+    </form>
+  </div>
+</div>
+    
   <div class="notice" id="notice"></div>
 
   <script>
     const STORAGE_KEYS = {
-      customers: "groomBookCustomers",
-      appointments: "groomBookAppointments"
-    };
+  customers: "groomBookCustomers",
+  appointments: "groomBookAppointments",
+  capacity: "groomBookCapacity"
+};
 
-    let customers = loadData(STORAGE_KEYS.customers);
-    let appointments = loadData(STORAGE_KEYS.appointments);
+let customers = loadData(STORAGE_KEYS.customers);
+let appointments = loadData(STORAGE_KEYS.appointments);
+
+let capacitySettings = loadCapacitySettings();
+
+let upcomingDaysFilter = 7;
 
     const screens = document.querySelectorAll(".screen");
     const navButtons = document.querySelectorAll(".nav-btn");
@@ -1188,6 +1690,30 @@
 
 const appointmentTotal =
   document.getElementById("appointmentTotal");
+
+const todayCapacity =
+  document.getElementById("todayCapacity");
+
+const upcomingPreview =
+  document.getElementById("upcomingPreview");
+
+const nextOpenings =
+  document.getElementById("nextOpenings");
+
+const allUpcomingAppointments =
+  document.getElementById("allUpcomingAppointments");
+
+const upcomingSearch =
+  document.getElementById("upcomingSearch");
+
+const reportsContent =
+  document.getElementById("reportsContent");
+
+const capacityModal =
+  document.getElementById("capacityModal");
+
+const capacityForm =
+  document.getElementById("capacityForm");
     
     initialize();
 
@@ -1261,6 +1787,85 @@ document
       customerForm.addEventListener("submit", saveCustomer);
       customerSearch.addEventListener("input", renderCustomers);
       cancelEditBtn.addEventListener("click", resetAppointmentForm);
+appointmentDate.addEventListener(
+  "change",
+  renderAppointmentAvailability
+);
+
+document
+  .getElementById("viewAllUpcomingBtn")
+  .addEventListener("click", () => {
+    showScreen("upcomingScreen");
+  });
+
+document
+  .getElementById("backFromUpcomingBtn")
+  .addEventListener("click", () => {
+    showScreen("todayScreen");
+  });
+
+document
+  .getElementById("openReportsBtn")
+  .addEventListener("click", () => {
+    showScreen("reportsScreen");
+  });
+
+document
+  .getElementById("backFromReportsBtn")
+  .addEventListener("click", () => {
+    showScreen("todayScreen");
+  });
+
+document
+  .getElementById("openCapacityBtn")
+  .addEventListener("click", () => {
+    renderCapacitySettings();
+    capacityModal.classList.add("open");
+  });
+
+document
+  .getElementById("closeCapacityBtn")
+  .addEventListener("click", () => {
+    capacityModal.classList.remove("open");
+  });
+
+capacityModal.addEventListener("click", event => {
+  if (event.target === capacityModal) {
+    capacityModal.classList.remove("open");
+  }
+});
+
+capacityForm.addEventListener(
+  "submit",
+  saveCapacitySettings
+);
+
+upcomingSearch.addEventListener(
+  "input",
+  renderAllUpcomingAppointments
+);
+
+document
+  .querySelectorAll("[data-upcoming-days]")
+  .forEach(button => {
+    button.addEventListener("click", () => {
+      document
+        .querySelectorAll("[data-upcoming-days]")
+        .forEach(item => {
+          item.classList.remove("active");
+        });
+
+      button.classList.add("active");
+
+      upcomingDaysFilter =
+        button.dataset.upcomingDays === "all"
+          ? "all"
+          : Number(button.dataset.upcomingDays);
+
+      renderAllUpcomingAppointments();
+    });
+  });
+      
     }
 
     function loadData(key) {
@@ -1274,16 +1879,21 @@ document
     }
 
     function saveAllData() {
-      localStorage.setItem(
-        STORAGE_KEYS.customers,
-        JSON.stringify(customers)
-      );
+  localStorage.setItem(
+    STORAGE_KEYS.customers,
+    JSON.stringify(customers)
+  );
 
-      localStorage.setItem(
-        STORAGE_KEYS.appointments,
-        JSON.stringify(appointments)
-      );
-    }
+  localStorage.setItem(
+    STORAGE_KEYS.appointments,
+    JSON.stringify(appointments)
+  );
+
+  localStorage.setItem(
+    STORAGE_KEYS.capacity,
+    JSON.stringify(capacitySettings)
+  );
+}
 
     function createId() {
       return Date.now().toString() +
@@ -1316,11 +1926,19 @@ document
       });
 
       navButtons.forEach(button => {
-        button.classList.toggle(
-          "active",
-          button.dataset.screen === screenId
-        );
-      });
+  const normalScreen = [
+    "todayScreen",
+    "calendarScreen",
+    "customersScreen",
+    "newScreen"
+  ].includes(screenId);
+
+  button.classList.toggle(
+    "active",
+    normalScreen &&
+      button.dataset.screen === screenId
+  );
+});
 
       if (screenId === "todayScreen") {
         renderTodayAppointments();
@@ -1338,6 +1956,14 @@ document
         populateCustomerOptions();
       }
 
+if (screenId === "upcomingScreen") {
+  renderAllUpcomingAppointments();
+}
+
+if (screenId === "reportsScreen") {
+  renderReports();
+}
+      
       window.scrollTo({
         top: 0,
         behavior: "smooth"
@@ -1345,11 +1971,16 @@ document
     }
 
     function renderAll() {
-      populateCustomerOptions();
-      renderTodayAppointments();
-      renderCalendarAppointments();
-      renderCustomers();
-    }
+  populateCustomerOptions();
+  renderTodayAppointments();
+  renderCalendarAppointments();
+  renderCustomers();
+  renderUpcomingPreview();
+  renderNextOpenings();
+  renderAllUpcomingAppointments();
+  renderReports();
+  renderAppointmentAvailability();
+}
 
     function populateCustomerOptions() {
   const currentValue = appointmentCustomer.value;
@@ -1715,7 +2346,42 @@ function formatExtras(extras) {
     return;
   }
 
-  const editingId = appointmentId.value;
+const editingId = appointmentId.value;
+
+const capacity = getDateCapacity(
+  date,
+  editingId,
+  petServices.length
+);
+
+if (capacity.closed) {
+  const proceed = confirm(
+    `${formatLongDate(date)} is marked closed.\n\nSchedule this appointment anyway?`
+  );
+
+  if (!proceed) {
+    return;
+  }
+}
+
+if (!capacity.closed && capacity.wouldExceed) {
+  const unitWord =
+    capacitySettings.mode === "pets"
+      ? "pets"
+      : "appointments";
+
+  const proceed = confirm(
+    `${formatLongDate(date)} is at or above its daily limit.\n\n` +
+    `Daily limit: ${capacity.limit} ${unitWord}\n` +
+    `Currently booked: ${capacity.used}\n` +
+    `This appointment adds: ${capacity.adding}\n\n` +
+    `Schedule it anyway?`
+  );
+
+  if (!proceed) {
+    return;
+  }
+}
 
   const duplicate = appointments.find(appointment =>
     appointment.date === date &&
@@ -1812,17 +2478,55 @@ function formatExtras(extras) {
         formatLongDate(today);
 
       renderAppointmentList(todaysItems, todayAppointments);
+      renderTodayCapacity();
+renderUpcomingPreview();
+renderNextOpenings();
     }
 
     function renderCalendarAppointments() {
       const selectedDate = calendarDate.value || getTodayString();
 
+      const capacity =
+  getDateCapacity(selectedDate);
+
+calendarAppointments.innerHTML = `
+  <div class="capacity-summary">
+    <div>
+      <strong>
+        ${escapeHtml(
+          formatLongDate(selectedDate)
+        )}
+      </strong>
+
+      <p>
+        ${
+          capacity.closed
+            ? "This date is marked closed."
+            : `${capacity.used} of ${capacity.limit} ${escapeHtml(
+                getCapacityUnit(
+                  capacity.limit
+                )
+              )} booked • ${capacity.remaining} opening${
+                capacity.remaining === 1
+                  ? ""
+                  : "s"
+              }`
+        }
+      </p>
+    </div>
+
+    <span class="capacity-badge ${capacity.status}">
+      ${escapeHtml(capacity.label)}
+    </span>
+  </div>
+`;
+      
       const items = appointments
         .filter(appointment => appointment.date === selectedDate)
         .sort(sortAppointments);
 
       if (!items.length) {
-        calendarAppointments.innerHTML = createEmptyState(
+        calendarAppointments.innerHTML += createEmptyState(
           "📅",
           "No appointments",
           `There are no appointments scheduled for ${formatLongDate(selectedDate)}.`
@@ -1831,7 +2535,7 @@ function formatExtras(extras) {
         return;
       }
 
-      calendarAppointments.innerHTML = `
+      calendarAppointments.innerHTML += `
         <div class="section-title">
           <div>
             <h2 style="font-size:17px;">${escapeHtml(formatLongDate(selectedDate))}</h2>
@@ -2513,6 +3217,1222 @@ function openPetForSelectedCustomer() {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
     }
+
+function loadCapacitySettings() {
+  const defaultSettings = {
+    mode: "pets",
+
+    weekdays: {
+      0: {
+        limit: 0,
+        closed: true
+      },
+
+      1: {
+        limit: 10,
+        closed: false
+      },
+
+      2: {
+        limit: 10,
+        closed: false
+      },
+
+      3: {
+        limit: 10,
+        closed: false
+      },
+
+      4: {
+        limit: 10,
+        closed: false
+      },
+
+      5: {
+        limit: 12,
+        closed: false
+      },
+
+      6: {
+        limit: 12,
+        closed: false
+      }
+    }
+  };
+
+  try {
+    const saved = localStorage.getItem(
+      STORAGE_KEYS.capacity
+    );
+
+    if (!saved) {
+      return defaultSettings;
+    }
+
+    const parsed = JSON.parse(saved);
+
+    return {
+      mode:
+        parsed.mode === "appointments"
+          ? "appointments"
+          : "pets",
+
+      weekdays: {
+        ...defaultSettings.weekdays,
+        ...(parsed.weekdays || {})
+      }
+    };
+  } catch (error) {
+    console.error(
+      "Unable to load capacity settings:",
+      error
+    );
+
+    return defaultSettings;
+  }
+}
+
+function parseLocalDate(dateString) {
+  const [year, month, day] =
+    String(dateString).split("-").map(Number);
+
+  return new Date(year, month - 1, day);
+}
+
+function makeDateString(date) {
+  const year = date.getFullYear();
+
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+
+  const day = String(
+    date.getDate()
+  ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function addDays(dateString, numberOfDays) {
+  const date = parseLocalDate(dateString);
+
+  date.setDate(
+    date.getDate() + numberOfDays
+  );
+
+  return makeDateString(date);
+}
+
+function getActiveAppointmentsForDate(
+  dateString,
+  excludeAppointmentId = ""
+) {
+  return appointments.filter(appointment => {
+    return (
+      appointment.date === dateString &&
+      appointment.id !== excludeAppointmentId &&
+      appointment.status !== "Cancelled"
+    );
+  });
+}
+
+function getAppointmentCapacityAmount(appointment) {
+  if (
+    capacitySettings.mode === "appointments"
+  ) {
+    return 1;
+  }
+
+  return Math.max(
+    1,
+    getAppointmentPetServices(appointment).length
+  );
+}
+
+function getDateCapacity(
+  dateString,
+  excludeAppointmentId = "",
+  addingAmount = 0
+) {
+  if (!dateString) {
+    return {
+      used: 0,
+      limit: 0,
+      remaining: 0,
+      closed: false,
+      status: "available",
+      label: "Available",
+      wouldExceed: false,
+      adding: addingAmount
+    };
+  }
+
+  const date = parseLocalDate(dateString);
+  const weekday = date.getDay();
+
+  const daySettings =
+    capacitySettings.weekdays[weekday] || {
+      limit: 0,
+      closed: false
+    };
+
+  const dayAppointments =
+    getActiveAppointmentsForDate(
+      dateString,
+      excludeAppointmentId
+    );
+
+  const used = dayAppointments.reduce(
+    (total, appointment) => {
+      return total +
+        getAppointmentCapacityAmount(appointment);
+    },
+    0
+  );
+
+  const limit = Math.max(
+    0,
+    Number(daySettings.limit) || 0
+  );
+
+  const closed = Boolean(daySettings.closed);
+
+  const remaining = closed
+    ? 0
+    : Math.max(0, limit - used);
+
+  const projected = used + addingAmount;
+
+  const wouldExceed =
+    !closed &&
+    limit > 0 &&
+    projected > limit;
+
+  let status = "available";
+  let label = "Available";
+
+  if (closed) {
+    status = "closed";
+    label = "Closed";
+  } else if (limit <= 0 || used >= limit) {
+    status = "full";
+    label = "Full";
+  } else if (remaining <= 2) {
+    status = "almost";
+    label = "Almost Full";
+  }
+
+  return {
+    used,
+    limit,
+    remaining,
+    closed,
+    status,
+    label,
+    wouldExceed,
+    adding: addingAmount
+  };
+}
+
+function getCapacityUnit(
+  amount,
+  capitalize = false
+) {
+  let word;
+
+  if (
+    capacitySettings.mode === "appointments"
+  ) {
+    word =
+      amount === 1
+        ? "appointment"
+        : "appointments";
+  } else {
+    word =
+      amount === 1
+        ? "pet"
+        : "pets";
+  }
+
+  if (capitalize) {
+    return word.charAt(0).toUpperCase() +
+      word.slice(1);
+  }
+
+  return word;
+}
+
+function renderTodayCapacity() {
+  if (!todayCapacity) {
+    return;
+  }
+
+  const today = getTodayString();
+  const capacity = getDateCapacity(today);
+
+  let details;
+
+  if (capacity.closed) {
+    details =
+      "This day is currently marked closed.";
+  } else if (capacity.limit <= 0) {
+    details =
+      "No spaces are available under the current limit.";
+  } else {
+    details =
+      `${capacity.used} of ${capacity.limit} ` +
+      `${getCapacityUnit(capacity.limit)} booked`;
+
+    if (capacity.remaining > 0) {
+      details +=
+        ` • ${capacity.remaining} opening` +
+        `${capacity.remaining === 1 ? "" : "s"}`;
+    }
+  }
+
+  todayCapacity.innerHTML = `
+    <div class="capacity-summary">
+      <div>
+        <strong>Today’s Capacity</strong>
+        <p>${escapeHtml(details)}</p>
+      </div>
+
+      <span class="capacity-badge ${capacity.status}">
+        ${escapeHtml(capacity.label)}
+      </span>
+    </div>
+  `;
+}
+
+function renderAppointmentAvailability() {
+  const existing =
+    document.getElementById(
+      "appointmentAvailability"
+    );
+
+  if (existing) {
+    existing.remove();
+  }
+
+  if (
+    !appointmentDate ||
+    !appointmentDate.value
+  ) {
+    return;
+  }
+
+  const petServices =
+    getSelectedPetServices();
+
+  const addingAmount =
+    capacitySettings.mode === "appointments"
+      ? 1
+      : Math.max(1, petServices.length);
+
+  const capacity = getDateCapacity(
+    appointmentDate.value,
+    appointmentId.value,
+    addingAmount
+  );
+
+  let message;
+
+  if (capacity.closed) {
+    message =
+      "This date is marked closed. You may still override the limit when saving.";
+  } else if (capacity.limit <= 0) {
+    message =
+      "This date has no available spaces under the current limit.";
+  } else if (capacity.remaining <= 0) {
+    message =
+      `This date is full at ${capacity.limit} ` +
+      `${getCapacityUnit(capacity.limit)}.`;
+  } else {
+    message =
+      `${capacity.remaining} opening` +
+      `${capacity.remaining === 1 ? "" : "s"} remaining. ` +
+      `${capacity.used} of ${capacity.limit} ` +
+      `${getCapacityUnit(capacity.limit)} booked.`;
+  }
+
+  const box = document.createElement("div");
+
+  box.id = "appointmentAvailability";
+  box.className = "availability-box";
+
+  box.innerHTML = `
+    <strong>
+      Date Availability
+
+      <span
+        class="capacity-badge ${capacity.status}"
+        style="margin-left:5px;"
+      >
+        ${escapeHtml(capacity.label)}
+      </span>
+    </strong>
+
+    <span>${escapeHtml(message)}</span>
+  `;
+
+  const dateRow =
+    appointmentDate.closest(".form-row");
+
+  if (dateRow) {
+    dateRow.insertAdjacentElement(
+      "afterend",
+      box
+    );
+  }
+}
+
+function getFutureAppointments() {
+  const today = getTodayString();
+
+  return appointments
+    .filter(appointment => {
+      return (
+        appointment.date > today &&
+        appointment.status !== "Cancelled"
+      );
+    })
+    .sort((first, second) => {
+      return (
+        `${first.date}T${first.time}`
+          .localeCompare(
+            `${second.date}T${second.time}`
+          )
+      );
+    });
+}
+
+function getUpcomingRowHtml(appointment) {
+  const customer = customers.find(
+    item =>
+      item.id === appointment.customerId
+  );
+
+  const petServices =
+    getAppointmentPetServices(appointment);
+
+  const petNames = petServices
+    .map(item => {
+      const pet = customer?.pets.find(
+        savedPet =>
+          savedPet.id === item.petId
+      );
+
+      return pet?.name || "Pet";
+    })
+    .join(", ");
+
+  const capacity =
+    getDateCapacity(appointment.date);
+
+  return `
+    <div class="upcoming-row">
+      <div class="upcoming-date">
+        ${escapeHtml(
+          parseLocalDate(
+            appointment.date
+          ).toLocaleDateString("en-US", {
+            weekday: "short",
+            month: "short",
+            day: "numeric"
+          })
+        )}
+      </div>
+
+      <div class="upcoming-main">
+        <strong>
+          ${escapeHtml(
+            formatTime(appointment.time)
+          )}
+          •
+          ${escapeHtml(
+            customer?.ownerName ||
+            "Unknown Customer"
+          )}
+        </strong>
+
+        <span>
+          ${escapeHtml(
+            petNames ||
+            `${petServices.length} pets`
+          )}
+
+          ${customer?.phone
+            ? ` • ${escapeHtml(customer.phone)}`
+            : ""}
+        </span>
+      </div>
+
+      <span class="capacity-badge ${capacity.status}">
+        ${escapeHtml(capacity.label)}
+      </span>
+    </div>
+  `;
+}
+
+function renderUpcomingPreview() {
+  if (!upcomingPreview) {
+    return;
+  }
+
+  const upcoming =
+    getFutureAppointments();
+
+  const previewItems =
+    upcoming.slice(0, 5);
+
+  document
+    .getElementById(
+      "upcomingPreviewSubtitle"
+    )
+    .textContent =
+      upcoming.length
+        ? `${upcoming.length} future appointment` +
+          `${upcoming.length === 1 ? "" : "s"}`
+        : "No upcoming appointments";
+
+  if (!previewItems.length) {
+    upcomingPreview.innerHTML =
+      createEmptyState(
+        "📆",
+        "No upcoming appointments",
+        "Future appointments will appear here."
+      );
+
+    return;
+  }
+
+  upcomingPreview.innerHTML =
+    previewItems
+      .map(getUpcomingRowHtml)
+      .join("") +
+    `
+      <p class="count-note">
+        Showing ${previewItems.length} of
+        ${upcoming.length} upcoming appointment${upcoming.length === 1 ? "" : "s"}
+      </p>
+    `;
+}
+
+function renderNextOpenings() {
+  if (!nextOpenings) {
+    return;
+  }
+
+  const openings = [];
+  const today = getTodayString();
+
+  for (
+    let dayOffset = 1;
+    dayOffset <= 45;
+    dayOffset++
+  ) {
+    const dateString =
+      addDays(today, dayOffset);
+
+    const capacity =
+      getDateCapacity(dateString);
+
+    if (
+      !capacity.closed &&
+      capacity.limit > 0 &&
+      capacity.remaining > 0
+    ) {
+      openings.push({
+        date: dateString,
+        ...capacity
+      });
+    }
+
+    if (openings.length >= 5) {
+      break;
+    }
+  }
+
+  if (!openings.length) {
+    nextOpenings.innerHTML =
+      createEmptyState(
+        "📆",
+        "No openings found",
+        "No available dates were found during the next 45 days."
+      );
+
+    return;
+  }
+
+  nextOpenings.innerHTML =
+    openings.map(opening => {
+      return `
+        <div class="opening-row">
+          <div class="upcoming-date">
+            ${escapeHtml(
+              parseLocalDate(
+                opening.date
+              ).toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric"
+              })
+            )}
+          </div>
+
+          <div class="upcoming-main">
+            <strong>
+              ${opening.remaining}
+              opening${opening.remaining === 1 ? "" : "s"}
+            </strong>
+
+            <span>
+              ${opening.used} of
+              ${opening.limit}
+              ${escapeHtml(
+                getCapacityUnit(
+                  opening.limit
+                )
+              )}
+              booked
+            </span>
+          </div>
+
+          <button
+            type="button"
+            class="small-btn success"
+            data-book-opening="${opening.date}"
+          >
+            Book
+          </button>
+        </div>
+      `;
+    }).join("");
+
+  nextOpenings
+    .querySelectorAll(
+      "[data-book-opening]"
+    )
+    .forEach(button => {
+      button.addEventListener(
+        "click",
+        () => {
+          resetAppointmentForm();
+
+          appointmentDate.value =
+            button.dataset.bookOpening;
+
+          showScreen("newScreen");
+
+          renderAppointmentAvailability();
+        }
+      );
+    });
+}
+
+function renderAllUpcomingAppointments() {
+  if (!allUpcomingAppointments) {
+    return;
+  }
+
+  const today = getTodayString();
+
+  const search =
+    upcomingSearch
+      ? upcomingSearch.value
+          .trim()
+          .toLowerCase()
+      : "";
+
+  let upcoming =
+    getFutureAppointments();
+
+  if (upcomingDaysFilter !== "all") {
+    const finalDate =
+      addDays(
+        today,
+        upcomingDaysFilter
+      );
+
+    upcoming = upcoming.filter(
+      appointment =>
+        appointment.date <= finalDate
+    );
+  }
+
+  if (search) {
+    upcoming = upcoming.filter(
+      appointment => {
+        const customer = customers.find(
+          item =>
+            item.id ===
+            appointment.customerId
+        );
+
+        const services =
+          getAppointmentPetServices(
+            appointment
+          );
+
+        const petText = services.map(
+          service => {
+            const pet =
+              customer?.pets.find(
+                item =>
+                  item.id ===
+                  service.petId
+              );
+
+            return [
+              pet?.name,
+              pet?.breed,
+              service.service,
+              formatExtras(
+                service.extras
+              )
+            ].join(" ");
+          }
+        ).join(" ");
+
+        const text = [
+          customer?.ownerName,
+          customer?.phone,
+          appointment.groomer,
+          appointment.notes,
+          petText
+        ].join(" ").toLowerCase();
+
+        return text.includes(search);
+      }
+    );
+  }
+
+  if (!upcoming.length) {
+    allUpcomingAppointments.innerHTML =
+      createEmptyState(
+        "📆",
+        "No upcoming appointments",
+        "No appointments match the selected filters."
+      );
+
+    return;
+  }
+
+  const grouped = {};
+
+  upcoming.forEach(appointment => {
+    if (!grouped[appointment.date]) {
+      grouped[appointment.date] = [];
+    }
+
+    grouped[appointment.date].push(
+      appointment
+    );
+  });
+
+  allUpcomingAppointments.innerHTML =
+    Object.keys(grouped)
+      .sort()
+      .map(dateString => {
+        const capacity =
+          getDateCapacity(dateString);
+
+        return `
+          <div class="upcoming-date-group">
+            <div class="upcoming-date-title">
+              ${escapeHtml(
+                formatLongDate(dateString)
+              )}
+
+              • ${capacity.used} of
+              ${capacity.limit}
+              ${escapeHtml(
+                getCapacityUnit(
+                  capacity.limit
+                )
+              )}
+
+              • ${escapeHtml(
+                capacity.label
+              )}
+            </div>
+
+            ${grouped[dateString]
+              .map(getUpcomingRowHtml)
+              .join("")}
+          </div>
+        `;
+      })
+      .join("");
+}
+
+function renderCapacitySettings() {
+  const weekdayNames = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday"
+  ];
+
+  document.getElementById(
+    "capacityMode"
+  ).value = capacitySettings.mode;
+
+  document.getElementById(
+    "weekdaySettings"
+  ).innerHTML =
+    weekdayNames.map(
+      (weekdayName, weekdayNumber) => {
+        const day =
+          capacitySettings.weekdays[
+            weekdayNumber
+          ] || {
+            limit: 10,
+            closed: false
+          };
+
+        return `
+          <div class="weekday-row">
+            <strong>
+              ${weekdayName}
+            </strong>
+
+            <input
+              type="number"
+              min="0"
+              data-capacity-limit="${weekdayNumber}"
+              value="${Number(day.limit) || 0}"
+              aria-label="${weekdayName} daily limit"
+            >
+
+            <label class="closed-label">
+              <input
+                type="checkbox"
+                data-capacity-closed="${weekdayNumber}"
+                ${day.closed ? "checked" : ""}
+              >
+
+              Closed
+            </label>
+          </div>
+        `;
+      }
+    ).join("");
+}
+
+function saveCapacitySettings(event) {
+  event.preventDefault();
+
+  capacitySettings.mode =
+    document.getElementById(
+      "capacityMode"
+    ).value;
+
+  for (
+    let weekday = 0;
+    weekday <= 6;
+    weekday++
+  ) {
+    const limitInput =
+      document.querySelector(
+        `[data-capacity-limit="${weekday}"]`
+      );
+
+    const closedInput =
+      document.querySelector(
+        `[data-capacity-closed="${weekday}"]`
+      );
+
+    capacitySettings.weekdays[
+      weekday
+    ] = {
+      limit:
+        Math.max(
+          0,
+          Number(limitInput.value) || 0
+        ),
+
+      closed:
+        Boolean(closedInput.checked)
+    };
+  }
+
+  saveAllData();
+
+  capacityModal.classList.remove(
+    "open"
+  );
+
+  renderAll();
+
+  showNotice(
+    "Daily capacity settings saved."
+  );
+}
+
+function getMonthKey(date) {
+  return (
+    `${date.getFullYear()}-` +
+    `${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}`
+  );
+}
+
+function createMonthReport(monthKey) {
+  const monthAppointments =
+    appointments.filter(
+      appointment =>
+        appointment.date.startsWith(
+          monthKey
+        )
+    );
+
+  const completedAppointments =
+    monthAppointments.filter(
+      appointment =>
+        appointment.status ===
+        "Completed"
+    );
+
+  const services = {};
+  const haircuts = {};
+  const extras = {};
+
+  let revenue = 0;
+  let petsGroomed = 0;
+
+  completedAppointments.forEach(
+    appointment => {
+      const customer = customers.find(
+        item =>
+          item.id ===
+          appointment.customerId
+      );
+
+      getAppointmentPetServices(
+        appointment
+      ).forEach(serviceItem => {
+        petsGroomed++;
+
+        revenue +=
+          Number.parseFloat(
+            serviceItem.price
+          ) || 0;
+
+        const serviceName =
+          serviceItem.service ||
+          "Unspecified";
+
+        services[serviceName] =
+          (services[serviceName] || 0) +
+          1;
+
+        const extraItems =
+          Array.isArray(
+            serviceItem.extras
+          )
+            ? serviceItem.extras
+            : [];
+
+        extraItems.forEach(extra => {
+          extras[extra] =
+            (extras[extra] || 0) +
+            1;
+        });
+
+        const pet =
+          customer?.pets.find(
+            item =>
+              item.id ===
+              serviceItem.petId
+          );
+
+        const haircutName =
+          pet?.haircut ||
+          "Unspecified";
+
+        haircuts[haircutName] =
+          (haircuts[haircutName] || 0) +
+          1;
+      });
+    }
+  );
+
+  return {
+    appointments:
+      monthAppointments.length,
+
+    completed:
+      completedAppointments.length,
+
+    cancelled:
+      monthAppointments.filter(
+        appointment =>
+          appointment.status ===
+          "Cancelled"
+      ).length,
+
+    noShow:
+      monthAppointments.filter(
+        appointment =>
+          appointment.status ===
+          "No Show"
+      ).length,
+
+    revenue,
+    petsGroomed,
+
+    averageAppointment:
+      completedAppointments.length
+        ? revenue /
+          completedAppointments.length
+        : 0,
+
+    services,
+    haircuts,
+    extras
+  };
+}
+
+function createComparisonRows(
+  currentItems,
+  previousItems
+) {
+  const names = [
+    ...new Set([
+      ...Object.keys(currentItems),
+      ...Object.keys(previousItems)
+    ])
+  ];
+
+  names.sort((first, second) => {
+    const firstTotal =
+      (currentItems[first] || 0) +
+      (previousItems[first] || 0);
+
+    const secondTotal =
+      (currentItems[second] || 0) +
+      (previousItems[second] || 0);
+
+    return secondTotal - firstTotal;
+  });
+
+  if (!names.length) {
+    return `
+      <tr>
+        <td colspan="3">
+          No completed records yet.
+        </td>
+      </tr>
+    `;
+  }
+
+  return names.map(name => {
+    return `
+      <tr>
+        <td>${escapeHtml(name)}</td>
+        <td>${currentItems[name] || 0}</td>
+        <td>${previousItems[name] || 0}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderReports() {
+  if (!reportsContent) {
+    return;
+  }
+
+  const currentDate = new Date();
+
+  const previousDate = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 1,
+    1
+  );
+
+  const currentReport =
+    createMonthReport(
+      getMonthKey(currentDate)
+    );
+
+  const previousReport =
+    createMonthReport(
+      getMonthKey(previousDate)
+    );
+
+  const currentMonthName =
+    currentDate.toLocaleDateString(
+      "en-US",
+      {
+        month: "long"
+      }
+    );
+
+  const previousMonthName =
+    previousDate.toLocaleDateString(
+      "en-US",
+      {
+        month: "long"
+      }
+    );
+
+  reportsContent.innerHTML = `
+    <div class="report-grid">
+      <div class="report-stat">
+        <strong>
+          ${currentReport.completed}
+        </strong>
+
+        <span>
+          Completed in
+          ${escapeHtml(currentMonthName)}
+        </span>
+      </div>
+
+      <div class="report-stat">
+        <strong>
+          ${previousReport.completed}
+        </strong>
+
+        <span>
+          Completed in
+          ${escapeHtml(previousMonthName)}
+        </span>
+      </div>
+
+      <div class="report-stat">
+        <strong>
+          ${currentReport.petsGroomed}
+        </strong>
+
+        <span>
+          Pets groomed this month
+        </span>
+      </div>
+
+      <div class="report-stat">
+        <strong>
+          $${formatMoney(
+            currentReport.revenue
+          )}
+        </strong>
+
+        <span>
+          Revenue this month
+        </span>
+      </div>
+
+      <div class="report-stat">
+        <strong>
+          $${formatMoney(
+            currentReport.averageAppointment
+          )}
+        </strong>
+
+        <span>
+          Average appointment
+        </span>
+      </div>
+
+      <div class="report-stat">
+        <strong>
+          ${
+            currentReport.cancelled +
+            currentReport.noShow
+          }
+        </strong>
+
+        <span>
+          Cancellations and no-shows
+        </span>
+      </div>
+    </div>
+
+    <h3>
+      Services:
+      ${escapeHtml(currentMonthName)}
+      vs
+      ${escapeHtml(previousMonthName)}
+    </h3>
+
+    <div class="card report-table-wrap">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th>This Month</th>
+            <th>Last Month</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${createComparisonRows(
+            currentReport.services,
+            previousReport.services
+          )}
+        </tbody>
+      </table>
+    </div>
+
+    <h3>
+      Haircuts:
+      ${escapeHtml(currentMonthName)}
+      vs
+      ${escapeHtml(previousMonthName)}
+    </h3>
+
+    <div class="card report-table-wrap">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Haircut</th>
+            <th>This Month</th>
+            <th>Last Month</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${createComparisonRows(
+            currentReport.haircuts,
+            previousReport.haircuts
+          )}
+        </tbody>
+      </table>
+    </div>
+
+    <h3>
+      Extras:
+      ${escapeHtml(currentMonthName)}
+      vs
+      ${escapeHtml(previousMonthName)}
+    </h3>
+
+    <div class="card report-table-wrap">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Extra</th>
+            <th>This Month</th>
+            <th>Last Month</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${createComparisonRows(
+            currentReport.extras,
+            previousReport.extras
+          )}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+    
   </script>
 </body>
 </html>
