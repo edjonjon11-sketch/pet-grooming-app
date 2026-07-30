@@ -1996,7 +1996,65 @@ document
   renderAppointmentPetChoices();
 });      appointmentForm.addEventListener("submit", saveAppointment);
       customerForm.addEventListener("submit", saveCustomer);
-      customerSearch.addEventListener("input", renderCustomers);
+      customerSearch.addEventListener("input", () => {
+  customerVisibleCount = 10;
+  renderCustomers();
+});
+
+  customerFilters.addEventListener("click", event => {
+  const button = event.target.closest(
+    "[data-customer-filter]"
+  );
+
+  if (!button) {
+    return;
+  }
+
+  customerStatusFilter =
+    button.dataset.customerFilter;
+
+  customerVisibleCount = 10;
+
+  customerFilters
+    .querySelectorAll("[data-customer-filter]")
+    .forEach(item => {
+      item.classList.toggle(
+        "active",
+        item === button
+      );
+    });
+
+  renderCustomers();
+});
+
+loadMoreCustomersBtn.addEventListener("click", () => {
+  customerVisibleCount += 10;
+  renderCustomers();
+});    
+
+  businessInsights.addEventListener("click", event => {
+  const button = event.target.closest(
+    "[data-insight-filter]"
+  );
+
+  if (!button) {
+    return;
+  }
+
+  const filter =
+    button.dataset.insightFilter;
+
+  showScreen("customersScreen");
+
+  const filterButton =
+    customerFilters.querySelector(
+      `[data-customer-filter="${filter}"]`
+    );
+
+  if (filterButton) {
+    filterButton.click();
+  }
+});    
       cancelEditBtn.addEventListener("click", resetAppointmentForm);
 appointmentDate.addEventListener(
   "change",
@@ -2186,6 +2244,7 @@ if (screenId === "reportsScreen") {
   renderTodayAppointments();
   renderCalendarAppointments();
   renderCustomers();
+  renderBusinessInsights();   
   renderUpcomingPreview();
   renderNextOpenings();
   renderAllUpcomingAppointments();
@@ -3168,6 +3227,194 @@ ${pet.extras
         });
     }
 
+function getCustomerInitials(name) {
+  const parts = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (!parts.length) {
+    return "?";
+  }
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return (
+    parts[0].charAt(0) +
+    parts[parts.length - 1].charAt(0)
+  ).toUpperCase();
+}
+
+function getCustomerCompletedAppointments(customerId) {
+  return appointments
+    .filter(appointment => {
+      return (
+        appointment.customerId === customerId &&
+        appointment.status === "Completed"
+      );
+    })
+    .sort((first, second) => {
+      return `${second.date}T${second.time}`.localeCompare(
+        `${first.date}T${first.time}`
+      );
+    });
+}
+
+function getLastCompletedCustomerAppointment(customerId) {
+  return (
+    getCustomerCompletedAppointments(customerId)[0] ||
+    null
+  );
+}
+
+function getNextCustomerAppointment(customerId) {
+  const today = getTodayString();
+
+  return (
+    appointments
+      .filter(appointment => {
+        return (
+          appointment.customerId === customerId &&
+          appointment.date >= today &&
+          appointment.status !== "Cancelled" &&
+          appointment.status !== "No Show" &&
+          appointment.status !== "Completed"
+        );
+      })
+      .sort((first, second) => {
+        return `${first.date}T${first.time}`.localeCompare(
+          `${second.date}T${second.time}`
+        );
+      })[0] || null
+  );
+}
+
+function getDaysSinceDate(dateString) {
+  if (!dateString) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const today = parseLocalDate(getTodayString());
+  const savedDate = parseLocalDate(dateString);
+
+  const difference =
+    today.getTime() - savedDate.getTime();
+
+  return Math.floor(
+    difference / (1000 * 60 * 60 * 24)
+  );
+}
+
+function getCustomerAgeInDays(customer) {
+  if (!customer.createdAt) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  const createdDate = new Date(customer.createdAt);
+  const today = new Date();
+
+  return Math.floor(
+    (today.getTime() - createdDate.getTime()) /
+    (1000 * 60 * 60 * 24)
+  );
+}
+
+function getCustomerStatus(customer) {
+  const completed =
+    getCustomerCompletedAppointments(customer.id);
+
+  const lastCompleted = completed[0] || null;
+
+  const daysSinceVisit = lastCompleted
+    ? getDaysSinceDate(lastCompleted.date)
+    : Number.POSITIVE_INFINITY;
+
+  const customerAge =
+    getCustomerAgeInDays(customer);
+
+  const today = parseLocalDate(getTodayString());
+
+  const twelveMonthsAgo = new Date(
+    today.getFullYear() - 1,
+    today.getMonth(),
+    today.getDate()
+  );
+
+  const visitsLastTwelveMonths =
+    completed.filter(appointment => {
+      return (
+        parseLocalDate(appointment.date) >=
+        twelveMonthsAgo
+      );
+    }).length;
+
+  const hasUpcomingAppointment =
+    Boolean(
+      getNextCustomerAppointment(customer.id)
+    );
+
+  if (visitsLastTwelveMonths >= 8) {
+    return {
+      key: "vip",
+      label: "VIP",
+      icon: "⭐"
+    };
+  }
+
+  if (
+    completed.length < 2 &&
+    customerAge <= 90
+  ) {
+    return {
+      key: "new",
+      label: "New",
+      icon: "🟣"
+    };
+  }
+
+  if (
+    hasUpcomingAppointment ||
+    daysSinceVisit <= 60
+  ) {
+    return {
+      key: "active",
+      label: "Active",
+      icon: "🟢"
+    };
+  }
+
+  if (
+    daysSinceVisit <= 180 ||
+    !lastCompleted
+  ) {
+    return {
+      key: "at-risk",
+      label: "At Risk",
+      icon: "🟡"
+    };
+  }
+
+  return {
+    key: "lost",
+    label: "Lost",
+    icon: "🔴"
+  };
+}
+
+function formatShortDate(dateString) {
+  if (!dateString) {
+    return "";
+  }
+
+  return parseLocalDate(dateString)
+    .toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric"
+    });
+}
+    
     function viewCustomerDetails(customerId) {
       const customer = customers.find(item => item.id === customerId);
 
