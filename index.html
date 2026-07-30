@@ -3152,11 +3152,27 @@ calendarAppointments.innerHTML = `
       }
 
       if (action === "complete") {
-        appointment.status = "Completed";
-        saveAllData();
-        renderAll();
-        showNotice("Appointment marked completed.");
-      }
+  const groomerName = prompt(
+    "Enter the groomer's name:"
+  );
+
+  if (groomerName === null) {
+    return;
+  }
+
+  appointment.groomer = groomerName.trim();
+  appointment.status = "Completed";
+
+  saveAllData();
+  renderAll();
+
+  showNotice(
+    appointment.groomer
+      ? `Appointment completed by ${appointment.groomer}.`
+      : "Appointment marked completed."
+  );
+}
+      
 
       if (action === "no-show") {
         appointment.status = "No Show";
