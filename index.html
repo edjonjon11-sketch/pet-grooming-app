@@ -3087,145 +3087,269 @@ calendarAppointments.innerHTML = `
 }
 
     function renderCustomers() {
-      const search = customerSearch.value.trim().toLowerCase();
+  const searchText = String(
+    customerSearch.value || ""
+  )
+    .trim()
+    .toLowerCase();
 
-      const filtered = customers
-        .filter(customer => {
-          const customerText = [
-            customer.ownerName,
-            customer.phone,
-            customer.email,
-            ...customer.pets.flatMap(pet => [
-              pet.name,
-              pet.breed,
-              pet.haircut,
-              pet.notes
-            ])
-          ]
-            .join(" ")
-            .toLowerCase();
+  const preparedCustomers = customers
+    .map(customer => {
+      const status = getCustomerStatus(customer);
 
-          return customerText.includes(search);
-        })
-        .sort((a, b) => a.ownerName.localeCompare(b.ownerName));
+      const nextAppointment =
+        getNextCustomerAppointment(customer.id);
 
-      customerList.innerHTML = "";
-
-      if (!filtered.length) {
-        customerList.innerHTML = createEmptyState(
-          "🐶",
-          search ? "No matching customers" : "No customers yet",
-          search
-            ? "Try searching with another name, pet or telephone number."
-            : "Add your first customer and pet to begin scheduling."
+      const lastAppointment =
+        getLastCompletedCustomerAppointment(
+          customer.id
         );
 
-        return;
+      return {
+        customer,
+        status,
+        nextAppointment,
+        lastAppointment
+      };
+    })
+    .filter(item => {
+      const customer = item.customer;
+
+      const customerPets = Array.isArray(
+        customer.pets
+      )
+        ? customer.pets
+        : [];
+
+      const petSearchText = customerPets
+        .map(pet => {
+          return [
+            pet.name,
+            pet.breed,
+            pet.type
+          ]
+            .filter(Boolean)
+            .join(" ");
+        })
+        .join(" ");
+
+      const searchableText = [
+        customer.name,
+        customer.firstName,
+        customer.lastName,
+        customer.phone,
+        customer.email,
+        customer.petName,
+        customer.petBreed,
+        petSearchText
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      const matchesSearch =
+        !searchText ||
+        searchableText.includes(searchText);
+
+      let matchesFilter = true;
+
+      if (
+        customerStatusFilter === "upcoming"
+      ) {
+        matchesFilter = Boolean(
+          item.nextAppointment
+        );
+      } else if (
+        customerStatusFilter !== "all"
+      ) {
+        matchesFilter =
+          item.status.key ===
+          customerStatusFilter;
       }
 
-      filtered.forEach(customer => {
-        const completedVisits = appointments.filter(
-          appointment =>
-            appointment.customerId === customer.id &&
-            appointment.status === "Completed"
-        ).length;
+      return matchesSearch && matchesFilter;
+    })
+    .sort((first, second) => {
+      const statusOrder = {
+        vip: 1,
+        active: 2,
+        new: 3,
+        "at-risk": 4,
+        lost: 5
+      };
 
-        const card = document.createElement("div");
-        card.className = "card customer-card";
+      const firstOrder =
+        statusOrder[first.status.key] || 99;
 
-        card.innerHTML = `
-          <div style="display:flex; justify-content:space-between; gap:12px;">
-            <div>
-              <h3>${escapeHtml(customer.ownerName)}</h3>
-              <p>
-                ${escapeHtml(customer.phone)}
-                ${customer.email ? ` • ${escapeHtml(customer.email)}` : ""}
-              </p>
-            </div>
+      const secondOrder =
+        statusOrder[second.status.key] || 99;
 
-            <span class="status-badge">
-              ${completedVisits} visit${completedVisits === 1 ? "" : "s"}
-            </span>
-          </div>
+      if (firstOrder !== secondOrder) {
+        return firstOrder - secondOrder;
+      }
 
-          <div class="pet-list">
-            ${customer.pets.map(pet => `
-              <div class="pet-row">
-                <strong>🐾 ${escapeHtml(pet.name)}</strong>
-                <span>
-                  ${escapeHtml(pet.breed || "Breed not entered")}
-                  ${pet.weight ? ` • ${escapeHtml(pet.weight)} lbs` : ""}
-                </span>
+      return String(
+        first.customer.name || ""
+      ).localeCompare(
+        String(second.customer.name || "")
+      );
+    });
 
-                ${pet.haircut
-  ? `<span>Haircut: ${escapeHtml(pet.haircut)}</span>`
-  : ""}
+  customerCount.textContent =
+    `${preparedCustomers.length} ${
+      preparedCustomers.length === 1
+        ? "customer"
+        : "customers"
+    }`;
 
-${pet.hairLength
-  ? `<span>Hair length: ${escapeHtml(pet.hairLength)}</span>`
-  : ""}
+  const visibleCustomers =
+    preparedCustomers.slice(
+      0,
+      customerVisibleCount
+    );
 
-${pet.extras
-  ? `<span>Extras: ${escapeHtml(pet.extras)}</span>`
-  : ""}
+  if (!visibleCustomers.length) {
+    customerList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>No customers found</h3>
+        <p>
+          Try another search or customer filter.
+        </p>
+      </div>
+    `;
+
+    loadMoreCustomersBtn.style.display =
+      "none";
+
+    return;
+  }
+
+  customerList.innerHTML =
+    visibleCustomers
+      .map(item => {
+        const customer = item.customer;
+        const status = item.status;
+
+        const customerName =
+          customer.name ||
+          [
+            customer.firstName,
+            customer.lastName
+          ]
+            .filter(Boolean)
+            .join(" ") ||
+          "Unnamed Customer";
+
+        let petSummary = "";
+
+        if (
+          Array.isArray(customer.pets) &&
+          customer.pets.length
+        ) {
+          petSummary = customer.pets
+            .map(pet => {
+              return [
+                pet.name,
+                pet.breed
+              ]
+                .filter(Boolean)
+                .join(" • ");
+            })
+            .join(", ");
+        } else {
+          petSummary = [
+            customer.petName,
+            customer.petBreed
+          ]
+            .filter(Boolean)
+            .join(" • ");
+        }
+
+        if (!petSummary) {
+          petSummary = "No pet added";
+        }
+
+        let appointmentText =
+          "No completed visits";
+
+        if (item.nextAppointment) {
+          appointmentText =
+            `Next: ${
+              formatShortDate(
+                item.nextAppointment.date
+              )
+            } • ${
+              formatTime(
+                item.nextAppointment.time
+              )
+            }`;
+        } else if (item.lastAppointment) {
+          appointmentText =
+            `Last Visit: ${
+              formatShortDate(
+                item.lastAppointment.date
+              )
+            }`;
+        }
+
+        const customerId =
+          encodeURIComponent(customer.id);
+
+        return `
+          <div class="compact-customer-card">
+            <div class="compact-customer-top">
+
+              <div class="customer-initials">
+                ${getCustomerInitials(
+                  customerName
+                )}
               </div>
-            `).join("")}
-          </div>
 
-          <div class="appointment-actions" style="padding-left:0;">
-            <button
-              type="button"
-              class="small-btn"
-              data-view-customer="${customer.id}"
-            >
-              View History
-            </button>
+              <div class="compact-customer-name">
+                <div class="customer-name-line">
+                  <h3>${customerName}</h3>
 
-            <button
-              type="button"
-              class="small-btn success"
-              data-book-customer="${customer.id}"
-            >
-              Book Appointment
-            </button>
+                  <span class="customer-status-badge status-${status.key}">
+                    ${status.icon} ${status.label}
+                  </span>
+                </div>
 
-            <button
-              type="button"
-              class="small-btn danger"
-              data-delete-customer="${customer.id}"
-            >
-              Delete Customer
-            </button>
+                <p class="compact-pet-line">
+                  ${petSummary}
+                </p>
+
+                <p class="compact-phone-line">
+                  ${customer.phone || "No phone number"}
+                </p>
+
+                <p class="compact-visit-line">
+                  ${appointmentText}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                class="customer-view-button"
+                onclick="viewCustomerDetails(
+                  decodeURIComponent('${customerId}')
+                )"
+              >
+                View →
+              </button>
+
+            </div>
           </div>
         `;
+      })
+      .join("");
 
-        customerList.appendChild(card);
-      });
-
-      customerList
-        .querySelectorAll("[data-view-customer]")
-        .forEach(button => {
-          button.addEventListener("click", () => {
-            viewCustomerDetails(button.dataset.viewCustomer);
-          });
-        });
-
-      customerList
-        .querySelectorAll("[data-book-customer]")
-        .forEach(button => {
-          button.addEventListener("click", () => {
-            bookForCustomer(button.dataset.bookCustomer);
-          });
-        });
-
-      customerList
-        .querySelectorAll("[data-delete-customer]")
-        .forEach(button => {
-          button.addEventListener("click", () => {
-            deleteCustomer(button.dataset.deleteCustomer);
-          });
-        });
-    }
+  loadMoreCustomersBtn.style.display =
+    preparedCustomers.length >
+    customerVisibleCount
+      ? "block"
+      : "none";
+}
 
 function getCustomerInitials(name) {
   const parts = String(name || "")
