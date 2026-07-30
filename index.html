@@ -3736,10 +3736,39 @@ function formatShortDate(dateString) {
                   </div>
 
                   <p style="color:var(--muted);">
-                    ${escapeHtml(formatTime(appointment.time))}
-                    • ${escapeHtml(pet?.name || "Pet")}
-                    • ${escapeHtml(appointment.service)}
-                  </p>
+  ${escapeHtml(formatTime(appointment.time))}
+
+  ${Array.isArray(appointment.petServices) && appointment.petServices.length
+    ? appointment.petServices.map(item => {
+        const scheduledPet = customer.pets?.find(
+          customerPet => String(customerPet.id) === String(item.petId)
+        );
+
+        return `
+          • ${escapeHtml(
+            scheduledPet?.name ||
+            item.petName ||
+            "Pet"
+          )}
+          • ${escapeHtml(
+            item.service ||
+            "Service not entered"
+          )}
+        `;
+      }).join("<br>")
+    : `
+      • ${escapeHtml(
+        pet?.name ||
+        appointment.petName ||
+        "Pet"
+      )}
+      • ${escapeHtml(
+        appointment.service ||
+        "Service not entered"
+      )}
+    `
+  }
+</p>
 
                   ${appointment.notes
                     ? `<p>📝 ${escapeHtml(appointment.notes)}</p>`
