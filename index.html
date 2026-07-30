@@ -3183,36 +3183,29 @@ calendarAppointments.innerHTML = `
     .map(customer => {
       const status = getCustomerStatus(customer);
 
-      const nextAppointment =
-        getNextCustomerAppointment(customer.id);
-
-      const lastAppointment =
-        getLastCompletedCustomerAppointment(
-          customer.id
-        );
-
       return {
         customer,
         status,
-        nextAppointment,
-        lastAppointment
+        nextAppointment:
+          getNextCustomerAppointment(customer.id),
+        lastAppointment:
+          getLastCompletedCustomerAppointment(customer.id)
       };
     })
     .filter(item => {
       const customer = item.customer;
 
-      const customerPets = Array.isArray(
-        customer.pets
-      )
+      const pets = Array.isArray(customer.pets)
         ? customer.pets
         : [];
 
-      const petSearchText = customerPets
+      const petSearchText = pets
         .map(pet => {
           return [
             pet.name,
             pet.breed,
-            pet.type
+            pet.haircut,
+            pet.notes
           ]
             .filter(Boolean)
             .join(" ");
@@ -3220,13 +3213,9 @@ calendarAppointments.innerHTML = `
         .join(" ");
 
       const searchableText = [
-        customer.name,
-        customer.firstName,
-        customer.lastName,
+        customer.ownerName,
         customer.phone,
         customer.email,
-        customer.petName,
-        customer.petBreed,
         petSearchText
       ]
         .filter(Boolean)
@@ -3239,18 +3228,13 @@ calendarAppointments.innerHTML = `
 
       let matchesFilter = true;
 
-      if (
-        customerStatusFilter === "upcoming"
-      ) {
+      if (customerStatusFilter === "upcoming") {
         matchesFilter = Boolean(
           item.nextAppointment
         );
-      } else if (
-        customerStatusFilter !== "all"
-      ) {
+      } else if (customerStatusFilter !== "all") {
         matchesFilter =
-          item.status.key ===
-          customerStatusFilter;
+          item.status.key === customerStatusFilter;
       }
 
       return matchesSearch && matchesFilter;
@@ -3275,18 +3259,14 @@ calendarAppointments.innerHTML = `
       }
 
       return String(
-        first.customer.name || ""
+        first.customer.ownerName || ""
       ).localeCompare(
-        String(second.customer.name || "")
+        String(second.customer.ownerName || "")
       );
     });
 
   customerCount.textContent =
-    `${preparedCustomers.length} ${
-      preparedCustomers.length === 1
-        ? "customer"
-        : "customers"
-    }`;
+    preparedCustomers.length;
 
   const visibleCustomers =
     preparedCustomers.slice(
@@ -3295,146 +3275,132 @@ calendarAppointments.innerHTML = `
     );
 
   if (!visibleCustomers.length) {
-    customerList.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">👥</div>
-        <h3>No customers found</h3>
-        <p>
-          Try another search or customer filter.
-        </p>
-      </div>
-    `;
+    customerList.innerHTML = createEmptyState(
+      "👥",
+      "No customers found",
+      "Try another search or customer filter."
+    );
 
-    loadMoreCustomersBtn.style.display =
-      "none";
+    loadMoreCustomersBtn.classList.add(
+      "hidden"
+    );
 
     return;
   }
 
-  customerList.innerHTML =
-    visibleCustomers
-      .map(item => {
-        const customer = item.customer;
-        const status = item.status;
+  customerList.innerHTML = visibleCustomers
+    .map(item => {
+      const customer = item.customer;
+      const status = item.status;
 
-        const customerName =
-          customer.name ||
-          [
-            customer.firstName,
-            customer.lastName
-          ]
-            .filter(Boolean)
-            .join(" ") ||
-          "Unnamed Customer";
+      const customerName =
+        customer.ownerName ||
+        "Unnamed Customer";
 
-        let petSummary = "";
+      const pets = Array.isArray(customer.pets)
+        ? customer.pets
+        : [];
 
-        if (
-          Array.isArray(customer.pets) &&
-          customer.pets.length
-        ) {
-          petSummary = customer.pets
+      const petSummary = pets.length
+        ? pets
             .map(pet => {
               return [
                 pet.name,
                 pet.breed
               ]
                 .filter(Boolean)
+                .map(escapeHtml)
                 .join(" • ");
             })
-            .join(", ");
-        } else {
-          petSummary = [
-            customer.petName,
-            customer.petBreed
-          ]
-            .filter(Boolean)
-            .join(" • ");
-        }
+            .join(", ")
+        : "No pet added";
 
-        if (!petSummary) {
-          petSummary = "No pet added";
-        }
+      let appointmentText =
+        "No completed visits";
 
-        let appointmentText =
-          "No completed visits";
+      if (item.nextAppointment) {
+        appointmentText =
+          `Next: ${formatShortDate(
+            item.nextAppointment.date
+          )} • ${formatTime(
+            item.nextAppointment.time
+          )}`;
+      } else if (item.lastAppointment) {
+        appointmentText =
+          `Last visit: ${formatShortDate(
+            item.lastAppointment.date
+          )}`;
+      }
 
-        if (item.nextAppointment) {
-          appointmentText =
-            `Next: ${
-              formatShortDate(
-                item.nextAppointment.date
-              )
-            } • ${
-              formatTime(
-                item.nextAppointment.time
-              )
-            }`;
-        } else if (item.lastAppointment) {
-          appointmentText =
-            `Last Visit: ${
-              formatShortDate(
-                item.lastAppointment.date
-              )
-            }`;
-        }
-
-        const customerId =
-          encodeURIComponent(customer.id);
-
-        return `
-          <div class="compact-customer-card">
-            <div class="compact-customer-top">
-
-              <div class="customer-initials">
-                ${getCustomerInitials(
-                  customerName
-                )}
-              </div>
-
-              <div class="compact-customer-name">
-                <div class="customer-name-line">
-                  <h3>${customerName}</h3>
-
-                  <span class="customer-status-badge status-${status.key}">
-                    ${status.icon} ${status.label}
-                  </span>
-                </div>
-
-                <p class="compact-pet-line">
-                  ${petSummary}
-                </p>
-
-                <p class="compact-phone-line">
-                  ${customer.phone || "No phone number"}
-                </p>
-
-                <p class="compact-visit-line">
-                  ${appointmentText}
-                </p>
-              </div>
-
-              <button
-                type="button"
-                class="customer-view-button"
-                onclick="viewCustomerDetails(
-                  decodeURIComponent('${customerId}')
-                )"
-              >
-                View →
-              </button>
-
+      return `
+        <div class="compact-customer-card">
+          <div class="compact-customer-top">
+            <div class="customer-initials">
+              ${escapeHtml(
+                getCustomerInitials(customerName)
+              )}
             </div>
-          </div>
-        `;
-      })
-      .join("");
 
-  loadMoreCustomersBtn.style.display =
-    preparedCustomers.length >
-    customerVisibleCount
-      ? "block"
-      : "none";
+            <div class="compact-customer-name">
+              <div class="customer-name-line">
+                <h3>
+                  ${escapeHtml(customerName)}
+                </h3>
+
+                <span
+                  class="customer-status-badge status-${status.key}"
+                >
+                  ${status.icon}
+                  ${escapeHtml(status.label)}
+                </span>
+              </div>
+
+              <p class="compact-pet-line">
+                ${petSummary}
+              </p>
+
+              <p class="compact-phone-line">
+                ${escapeHtml(
+                  customer.phone ||
+                  "No telephone number"
+                )}
+              </p>
+
+              <p class="compact-visit-line">
+                ${escapeHtml(appointmentText)}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="customer-view-button"
+              data-view-customer="${escapeHtml(
+                customer.id
+              )}"
+            >
+              View →
+            </button>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  customerList
+    .querySelectorAll("[data-view-customer]")
+    .forEach(button => {
+      button.addEventListener("click", () => {
+        viewCustomerDetails(
+          button.dataset.viewCustomer
+        );
+      });
+    });
+
+  loadMoreCustomersBtn.classList.toggle(
+    "hidden",
+    preparedCustomers.length <=
+      customerVisibleCount
+  );
 }
 
 function getCustomerInitials(name) {
