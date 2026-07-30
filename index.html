@@ -2252,6 +2252,79 @@ if (screenId === "reportsScreen") {
       });
     }
 
+    function renderBusinessInsights() {
+  if (!businessInsights) {
+    return;
+  }
+
+  const statusCounts = {
+    vip: 0,
+    "at-risk": 0,
+    lost: 0
+  };
+
+  customers.forEach(customer => {
+    const status = getCustomerStatus(customer);
+
+    if (statusCounts[status.key] !== undefined) {
+      statusCounts[status.key]++;
+    }
+  });
+
+  businessInsights.innerHTML = `
+    <button
+      type="button"
+      class="insight-row"
+      data-insight-filter="vip"
+    >
+      <span class="insight-icon">⭐</span>
+
+      <span class="insight-main">
+        <strong>VIP Customers</strong>
+        <span>Frequent customers with 8 or more visits</span>
+      </span>
+
+      <span class="insight-number">
+        ${statusCounts.vip}
+      </span>
+    </button>
+
+    <button
+      type="button"
+      class="insight-row"
+      data-insight-filter="at-risk"
+    >
+      <span class="insight-icon">🟡</span>
+
+      <span class="insight-main">
+        <strong>At Risk Customers</strong>
+        <span>Customers who may need a follow-up</span>
+      </span>
+
+      <span class="insight-number">
+        ${statusCounts["at-risk"]}
+      </span>
+    </button>
+
+    <button
+      type="button"
+      class="insight-row"
+      data-insight-filter="lost"
+    >
+      <span class="insight-icon">🔴</span>
+
+      <span class="insight-main">
+        <strong>Lost Customers</strong>
+        <span>No completed visit in over 180 days</span>
+      </span>
+
+      <span class="insight-number">
+        ${statusCounts.lost}
+      </span>
+    </button>
+  `;
+}
+    
     function renderAll() {
   populateCustomerOptions();
   renderTodayAppointments();
