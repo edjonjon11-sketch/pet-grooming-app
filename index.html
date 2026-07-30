@@ -1874,6 +1874,8 @@ let appointments = loadData(STORAGE_KEYS.appointments);
 let capacitySettings = loadCapacitySettings();
 
 let upcomingDaysFilter = 7;
+let customerStatusFilter = "all";
+let customerVisibleCount = 10;
 
     const screens = document.querySelectorAll(".screen");
     const navButtons = document.querySelectorAll(".nav-btn");
@@ -1894,6 +1896,17 @@ let upcomingDaysFilter = 7;
     const detailsModal = document.getElementById("detailsModal");
     const customerForm = document.getElementById("customerForm");
     const customerSearch = document.getElementById("customerSearch");
+    const businessInsights =
+  document.getElementById("businessInsights");
+
+const customerCount =
+  document.getElementById("customerCount");
+
+const customerFilters =
+  document.getElementById("customerFilters");
+
+const loadMoreCustomersBtn =
+  document.getElementById("loadMoreCustomersBtn");
     const calendarDate = document.getElementById("calendarDate");
 
     const appointmentPetsContainer =
