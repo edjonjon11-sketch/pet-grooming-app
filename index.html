@@ -3083,14 +3083,21 @@ calendarAppointments.innerHTML = `
       </div>
 
       <div class="appointment-actions">
-        <button
-          type="button"
-          class="small-btn success"
-          data-action="complete"
-          data-id="${appointment.id}"
-        >
-          Complete
-        </button>
+        ${appointment.status !== "Completed"
+  && appointment.status !== "Cancelled"
+  && appointment.status !== "No Show"
+    ? `
+      <button
+        type="button"
+        class="small-btn success"
+        data-action="complete"
+        data-id="${appointment.id}"
+      >
+        Complete
+      </button>
+    `
+    : ""
+}
 
         <button
           type="button"
