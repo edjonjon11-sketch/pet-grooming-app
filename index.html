@@ -3786,9 +3786,24 @@ function formatShortDate(dateString) {
   }
 </p>
 
-                  ${appointment.notes
-                    ? `<p>📝 ${escapeHtml(appointment.notes)}</p>`
-                    : ""}
+                  ${appointment.groomer
+  ? `
+    <p style="margin:10px 0 0;">
+      ✂️ <strong>Groomer:</strong>
+      ${escapeHtml(appointment.groomer)}
+    </p>
+  `
+  : ""
+}
+
+${appointment.notes
+  ? `
+    <p style="margin:10px 0 0;">
+      📝 ${escapeHtml(appointment.notes)}
+    </p>
+  `
+  : ""
+}
                 </div>
               `;
             }).join("")
