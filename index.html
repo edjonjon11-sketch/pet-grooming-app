@@ -1188,6 +1188,52 @@
   color:#666;
 }
 
+
+  .business-greeting{
+
+    background:linear-gradient(135deg,#6759d9,#8c7cff);
+
+    color:white;
+
+    padding:22px;
+
+    border-radius:20px;
+
+    margin-bottom:18px;
+
+    box-shadow:0 10px 25px rgba(103,89,217,.25);
+
+}
+
+.business-greeting h3{
+
+    margin:0;
+
+    font-size:28px;
+
+    font-weight:800;
+
+}
+
+.business-greeting p{
+
+    margin:8px 0 4px;
+
+    opacity:.9;
+
+    font-size:15px;
+
+}
+
+.greeting-message{
+
+    opacity:.95;
+
+    font-size:14px;
+
+}  
+
+
 .customer-view-button{
   border:none;
   background:#6759d9;
@@ -1222,8 +1268,26 @@
     <section class="screen active" id="todayScreen">
       <div class="section-title">
   <div>
-    <h2>Today’s Schedule</h2>
-    <p id="todaySubtitle">Appointments scheduled for today</p>
+
+<div class="business-greeting">
+
+    <h3 id="greetingTitle">
+        Good Morning! 👋
+    </h3>
+
+    <p id="greetingDate"></p>
+
+    <span class="greeting-message">
+        Welcome back! Here's how your business looks today.
+    </span>
+
+</div>
+    
+    <h2>🏠 Business Home</h2>
+
+<p id="todaySubtitle">
+Everything happening in your salon today, at a glance.
+</p>
   </div>
 
   <div class="today-tools">
@@ -2604,6 +2668,30 @@ if (screenId === "reportsScreen") {
   updateAppointmentTotal();
 }
 
+function updateGreeting(){
+
+    const now = new Date();
+
+    let greeting = "Good Morning";
+
+    if(now.getHours() >= 12)
+        greeting = "Good Afternoon";
+
+    if(now.getHours() >= 17)
+        greeting = "Good Evening";
+
+    document.getElementById("greetingTitle").textContent =
+        greeting + "! 👋";
+
+    document.getElementById("greetingDate").textContent =
+        now.toLocaleDateString("en-US",{
+            weekday:"long",
+            month:"long",
+            day:"numeric"
+        });
+
+}
+    
 function getSelectedPetServices() {
   return Array.from(
     appointmentPetsContainer.querySelectorAll(
