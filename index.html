@@ -130,33 +130,42 @@
     }
 
     .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 15px;
-    }
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 22px 0;
+}
 
-    .summary-card {
-      padding: 14px 8px;
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: white;
-      text-align: center;
-    }
+.summary-card {
+    background: white;
+    border-radius: 22px;
+    padding: 22px 14px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    border: none;
+    transition: .25s ease;
+}
 
-    .summary-number {
-      display: block;
-      font-size: 24px;
-      font-weight: 750;
-      color: var(--primary);
-    }
+.summary-card:hover {
+    transform: translateY(-3px);
+}
 
-    .summary-label {
-      display: block;
-      margin-top: 3px;
-      color: var(--muted);
-      font-size: 11px;
-    }
+.summary-number {
+    display: block;
+    font-size: 34px;
+    font-weight: 800;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.summary-label {
+    display: block;
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--subtext);
+    letter-spacing: .3px;
+}
 
     .appointment-card {
       position: relative;
@@ -177,6 +186,35 @@
       background: var(--success);
     }
 
+ /* ===== GROOMBOOK DESIGN SYSTEM ===== */
+
+:root{
+    --primary:#6C5CE7;
+    --primary-dark:#5648d8;
+    --success:#18B979;
+    --warning:#F6A623;
+    --danger:#EF5A5A;
+
+    --bg:#F7F8FC;
+    --card:#FFFFFF;
+
+    --text:#1D2433;
+    --subtext:#7A8299;
+
+    --radius:22px;
+
+    --shadow:
+        0 8px 30px rgba(18,38,63,.08);
+
+    --transition:.25s ease;
+}
+
+body{
+    background:var(--bg);
+    font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--text);
+}
+    
     .appointment-card.cancelled::before {
       background: var(--danger);
     }
