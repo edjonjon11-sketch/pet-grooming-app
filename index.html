@@ -1291,24 +1291,51 @@ body{
 =========================== */
 
 #landingPage{
-
 position:fixed;
 top:0;
 left:0;
 width:100%;
 height:100vh;
+overflow:hidden;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:#111;
+
+z-index:5000;
+}
+
+#landingVideo{
+position:absolute;
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+object-fit:cover;
+
+z-index:-2;
+}
+
+#landingPage::before{
+
+content:"";
+
+position:absolute;
+inset:0;
 
 background:
-
 linear-gradient(
-rgba(20,20,30,.60),
-rgba(20,20,30,.60)
-),
+rgba(20,20,30,.58),
+rgba(20,20,30,.68)
+);
 
-url("https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&w=1600&q=80");
+z-index:-1;
 
-background-size:cover;
-background-position:center;
+}
 
 display:flex;
 justify-content:center;
@@ -1459,6 +1486,46 @@ background:white;
 color:#6759d9;
 
 }   
+
+@keyframes fadeUp{
+    from{
+        opacity:0;
+        transform:translateY(30px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.logo-circle{
+    animation:fadeUp .5s ease;
+}
+
+.hero-content h1{
+    animation:fadeUp .8s ease;
+}
+
+.hero-content h2{
+    animation:fadeUp 1s ease;
+}
+
+.hero-text{
+    animation:fadeUp 1.2s ease;
+}
+
+.hero-primary{
+    animation:fadeUp 1.4s ease;
+}
+
+.hero-secondary{
+    animation:fadeUp 1.6s ease;
+}
+
+.hero-trust{
+    animation:fadeUp 1.8s ease;
+}
     
   </style>
 </head>
@@ -1471,6 +1538,19 @@ color:#6759d9;
 
 <section id="landingPage">
 
+  <video
+id="landingVideo"
+autoplay
+muted
+loop
+playsinline>
+
+<source
+src="https://assets.mixkit.co/videos/preview/mixkit-woman-grooming-a-small-dog-4627-large.mp4"
+type="video/mp4">
+
+</video>
+
     <div class="hero-overlay">
 
         <div class="hero-content">
@@ -1482,18 +1562,20 @@ color:#6759d9;
             <h1>GroomBook</h1>
 
             <h2>
-                Grow Your Grooming Business.
-            </h2>
+    The smarter way to run your grooming business.
+</h2>
 
             <p class="hero-text">
 
-                Schedule appointments.
+Schedule appointments.
 
-                Build stronger customer relationships.
+Reduce no-shows.
 
-                Grow with confidence.
+Build loyal customers.
 
-            </p>
+Grow with confidence.
+
+</p>
 
             <button id="startTrialBtn"
             class="hero-primary">
