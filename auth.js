@@ -5,6 +5,10 @@
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_oz-OUZHBBXPqhL67ezrHUg_1AtwnXNe";
   const SUPABASE_CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   const CAPACITY_KEY = "groomBookCapacity";
+  const BRAND_NAME = "GroomBook";
+  const PARENT_BRAND = "Cretena";
+  const BRAND_APP_ICON = "groombook-app-icon.png";
+  const BRAND_DARK_LOGO = "groombook-logo-dark.png";
 
   const authStyles = `
     .gb-auth-screen {
@@ -36,12 +40,20 @@
     .gb-auth-logo {
       display: grid;
       place-items: center;
-      width: 72px;
-      height: 72px;
+      width: 78px;
+      height: 78px;
       margin: 0 auto 12px;
-      border-radius: 50%;
-      background: #f0edff;
-      font-size: 34px;
+      overflow: hidden;
+      border-radius: 22px;
+      background: #071a35;
+      box-shadow: 0 10px 24px rgba(3, 21, 48, .22);
+    }
+
+    .gb-auth-logo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .gb-auth-brand h2 { margin: 0; color: #202236; font-size: 27px; }
@@ -158,6 +170,75 @@
 
     .gb-signout-btn.show { display: block; }
 
+    .gb-splash {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background:
+        radial-gradient(circle at 50% 35%, rgba(0, 178, 214, .22), transparent 36%),
+        linear-gradient(150deg, #020b1c, #061a36 58%, #063e57);
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .55s ease, visibility .55s ease;
+    }
+
+    .gb-splash.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .gb-splash-inner {
+      width: min(92vw, 620px);
+      text-align: center;
+    }
+
+    .gb-splash-logo {
+      display: block;
+      width: 100%;
+      height: auto;
+      margin: 0 auto 24px;
+      border-radius: 24px;
+      box-shadow: 0 22px 65px rgba(0, 0, 0, .24);
+    }
+
+    .gb-splash-message {
+      margin: 0;
+      color: rgba(255,255,255,.93);
+      font-size: clamp(16px, 4vw, 21px);
+      font-weight: 700;
+      letter-spacing: .01em;
+    }
+
+    .gb-paw-loader {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .gb-paw-loader span {
+      display: inline-block;
+      color: #29c3df;
+      font-size: 22px;
+      opacity: .3;
+      transform: translateY(0) rotate(-8deg);
+      animation: gbPawWalk 1.15s infinite ease-in-out;
+    }
+
+    .gb-paw-loader span:nth-child(2) { animation-delay: .14s; }
+    .gb-paw-loader span:nth-child(3) { animation-delay: .28s; }
+    .gb-paw-loader span:nth-child(4) { animation-delay: .42s; }
+
+    @keyframes gbPawWalk {
+      0%, 70%, 100% { opacity: .28; transform: translateY(0) rotate(-8deg) scale(.94); }
+      30% { opacity: 1; transform: translateY(-7px) rotate(4deg) scale(1.08); }
+    }
+
     @media (max-width: 430px) {
       .gb-auth-screen { padding-right: 12px; padding-left: 12px; }
       .gb-auth-card { margin: 6px auto; padding: 21px 17px; border-radius: 23px; }
@@ -168,7 +249,7 @@
     <section class="gb-auth-screen" id="gbSignupScreen" aria-hidden="true">
       <div class="gb-auth-card">
         <div class="gb-auth-brand">
-          <div class="gb-auth-logo">🐾</div>
+          <div class="gb-auth-logo"><img src="groombook-app-icon.png" alt="GroomBook"></div>
           <h2>Create Your GroomBook Account</h2>
           <p>Set up your grooming business and begin your free trial.</p>
         </div>
@@ -227,7 +308,7 @@
     <section class="gb-auth-screen" id="gbLoginScreen" aria-hidden="true">
       <div class="gb-auth-card">
         <div class="gb-auth-brand">
-          <div class="gb-auth-logo">🐾</div>
+          <div class="gb-auth-logo"><img src="groombook-app-icon.png" alt="GroomBook"></div>
           <h2>Welcome Back</h2>
           <p>Sign in to open your GroomBook dashboard.</p>
         </div>
@@ -284,6 +365,75 @@
       script.onerror = () => reject(new Error("Supabase library could not load."));
       document.head.appendChild(script);
     });
+  }
+
+  function createSplash() {
+    let splash = document.getElementById("gbSplash");
+    if (splash) return splash;
+
+    splash = document.createElement("div");
+    splash.id = "gbSplash";
+    splash.className = "gb-splash";
+    splash.setAttribute("role", "status");
+    splash.setAttribute("aria-live", "polite");
+    splash.innerHTML = `
+      <div class="gb-splash-inner">
+        <img class="gb-splash-logo" src="${BRAND_DARK_LOGO}" alt="GroomBook by Cretena">
+        <p class="gb-splash-message">Syncing today's appointments...</p>
+        <div class="gb-paw-loader" aria-hidden="true">
+          <span>🐾</span><span>🐾</span><span>🐾</span><span>🐾</span>
+        </div>
+      </div>
+    `;
+    splash.dataset.startedAt = String(Date.now());
+    document.body.appendChild(splash);
+    return splash;
+  }
+
+  async function hideSplash() {
+    const splash = document.getElementById("gbSplash");
+    if (!splash) return;
+
+    const startedAt = Number(splash.dataset.startedAt || Date.now());
+    const remaining = Math.max(0, 1050 - (Date.now() - startedAt));
+    if (remaining) {
+      await new Promise(resolve => setTimeout(resolve, remaining));
+    }
+
+    splash.classList.add("hidden");
+    setTimeout(() => splash.remove(), 650);
+  }
+
+  function decorateBranding(landingPage) {
+    document.title = `${BRAND_NAME} by ${PARENT_BRAND}`;
+
+    const logoCircle = landingPage?.querySelector(".logo-circle");
+    if (logoCircle) {
+      logoCircle.innerHTML = `<img src="${BRAND_APP_ICON}" alt="GroomBook">`;
+      logoCircle.style.overflow = "hidden";
+      logoCircle.style.padding = "0";
+      const image = logoCircle.querySelector("img");
+      if (image) {
+        image.style.width = "100%";
+        image.style.height = "100%";
+        image.style.objectFit = "cover";
+      }
+    }
+
+    const heroContent = landingPage?.querySelector(".hero-content");
+    const heroTitle = heroContent?.querySelector("h1");
+    if (heroTitle && !heroContent.querySelector(".gb-byline")) {
+      const byline = document.createElement("div");
+      byline.className = "gb-byline";
+      byline.textContent = `by ${PARENT_BRAND}`;
+      byline.style.marginTop = "-8px";
+      byline.style.marginBottom = "18px";
+      byline.style.color = "rgba(255,255,255,.9)";
+      byline.style.fontSize = "16px";
+      byline.style.fontWeight = "700";
+      byline.style.letterSpacing = ".08em";
+      heroTitle.insertAdjacentElement("afterend", byline);
+    }
   }
 
   function normalizeEmail(value) {
@@ -348,6 +498,9 @@
     if (!document.getElementById("gbSignupScreen")) {
       document.body.insertAdjacentHTML("beforeend", authMarkup);
     }
+
+    createSplash();
+    decorateBranding(landingPage);
 
     const signupScreen = document.getElementById("gbSignupScreen");
     const loginScreen = document.getElementById("gbLoginScreen");
@@ -727,19 +880,27 @@
 
     try {
       const client = await clientReady;
-      const { data, error } = await client.auth.getUser();
+      const { data, error } = await client.auth.getSession();
       if (error) {
         throw error;
       }
 
-      if (data.user) {
-        await openOnlineSession(data.user);
+      const user = data.session?.user || null;
+      if (user) {
+        try {
+          await openOnlineSession(user);
+        } catch (profileError) {
+          console.warn("GroomBook restored the login but could not refresh the business profile yet:", profileError);
+          showApp(normalizeProfile(null, user), user);
+        }
       } else {
         showLanding();
       }
     } catch (error) {
       console.error("GroomBook online authentication did not initialize:", error);
       showLanding();
+    } finally {
+      await hideSplash();
     }
   }
 
