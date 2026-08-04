@@ -395,7 +395,7 @@
     if (!splash) return;
 
     const startedAt = Number(splash.dataset.startedAt || Date.now());
-    const remaining = Math.max(0, 1050 - (Date.now() - startedAt));
+    const remaining = Math.max(0, 4000 - (Date.now() - startedAt));
     if (remaining) {
       await new Promise(resolve => setTimeout(resolve, remaining));
     }
