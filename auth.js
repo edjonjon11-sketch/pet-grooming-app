@@ -1,8 +1,9 @@
 (() => {
   "use strict";
 
-  const ACCOUNT_KEY = "groomBookAccount_v1";
-  const SESSION_KEY = "groomBookSession_v1";
+  const SUPABASE_URL = "https://eyvaldlxcyviuuhwykuw.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_oz-OUZHBBXPqhL67ezrHUg_1AtwnXNe";
+  const SUPABASE_CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   const CAPACITY_KEY = "groomBookCapacity";
 
   const authStyles = `
@@ -18,9 +19,7 @@
         linear-gradient(145deg, #4d3cc8, #7c6df1 55%, #a79cf8);
     }
 
-    .gb-auth-screen.open {
-      display: block;
-    }
+    .gb-auth-screen.open { display: block; }
 
     .gb-auth-card {
       width: 100%;
@@ -32,10 +31,7 @@
       box-shadow: 0 24px 70px rgba(20, 14, 75, .28);
     }
 
-    .gb-auth-brand {
-      margin-bottom: 22px;
-      text-align: center;
-    }
+    .gb-auth-brand { margin-bottom: 22px; text-align: center; }
 
     .gb-auth-logo {
       display: grid;
@@ -48,11 +44,7 @@
       font-size: 34px;
     }
 
-    .gb-auth-brand h2 {
-      margin: 0;
-      color: #202236;
-      font-size: 27px;
-    }
+    .gb-auth-brand h2 { margin: 0; color: #202236; font-size: 27px; }
 
     .gb-auth-brand p {
       margin: 7px 0 0;
@@ -61,10 +53,7 @@
       line-height: 1.45;
     }
 
-    .gb-auth-form {
-      display: grid;
-      gap: 14px;
-    }
+    .gb-auth-form { display: grid; gap: 14px; }
 
     .gb-auth-form label {
       display: block;
@@ -94,10 +83,7 @@
     .gb-auth-primary,
     .gb-auth-secondary,
     .gb-auth-link,
-    .gb-signout-btn {
-      font: inherit;
-      cursor: pointer;
-    }
+    .gb-signout-btn { font: inherit; cursor: pointer; }
 
     .gb-auth-primary {
       width: 100%;
@@ -111,10 +97,7 @@
       box-shadow: 0 10px 22px rgba(103,89,217,.25);
     }
 
-    .gb-auth-primary:disabled {
-      opacity: .65;
-      cursor: wait;
-    }
+    .gb-auth-primary:disabled { opacity: .65; cursor: wait; }
 
     .gb-auth-secondary {
       width: 100%;
@@ -151,9 +134,7 @@
       line-height: 1.4;
     }
 
-    .gb-auth-error.show {
-      display: block;
-    }
+    .gb-auth-error.show { display: block; }
 
     .gb-auth-note {
       margin: 4px 0 0;
@@ -175,21 +156,11 @@
       font-weight: 750;
     }
 
-    .gb-signout-btn.show {
-      display: block;
-    }
+    .gb-signout-btn.show { display: block; }
 
     @media (max-width: 430px) {
-      .gb-auth-screen {
-        padding-right: 12px;
-        padding-left: 12px;
-      }
-
-      .gb-auth-card {
-        margin: 6px auto;
-        padding: 21px 17px;
-        border-radius: 23px;
-      }
+      .gb-auth-screen { padding-right: 12px; padding-left: 12px; }
+      .gb-auth-card { margin: 6px auto; padding: 21px 17px; border-radius: 23px; }
     }
   `;
 
@@ -243,7 +214,7 @@
           <button class="gb-auth-primary" id="gbSignupSubmit" type="submit">Start My Free Trial</button>
           <button class="gb-auth-secondary" id="gbSignupBack" type="button">Back</button>
 
-          <p class="gb-auth-note">This first version saves the account on this device. Online, cross-device accounts will be connected in the next phase.</p>
+          <p class="gb-auth-note">Your GroomBook account and business profile are saved securely online and can be used on another device.</p>
         </form>
 
         <p class="gb-auth-switch">
@@ -286,7 +257,78 @@
     </section>
   `;
 
-  function initAuth() {
+  function loadSupabaseLibrary() {
+    if (window.supabase?.createClient) {
+      return Promise.resolve(window.supabase);
+    }
+
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-groombook-supabase="true"]');
+      if (existing) {
+        existing.addEventListener("load", () => resolve(window.supabase), { once: true });
+        existing.addEventListener("error", () => reject(new Error("Supabase library could not load.")), { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = SUPABASE_CDN;
+      script.async = true;
+      script.dataset.groombookSupabase = "true";
+      script.onload = () => {
+        if (window.supabase?.createClient) {
+          resolve(window.supabase);
+        } else {
+          reject(new Error("Supabase library loaded incorrectly."));
+        }
+      };
+      script.onerror = () => reject(new Error("Supabase library could not load."));
+      document.head.appendChild(script);
+    });
+  }
+
+  function normalizeEmail(value) {
+    return String(value || "").trim().toLowerCase();
+  }
+
+  function createCapacitySettings(dailyCapacity) {
+    const capacity = Math.max(1, Math.min(100, Number(dailyCapacity) || 10));
+    return {
+      mode: "pets",
+      weekdays: {
+        0: { limit: 0, closed: true },
+        1: { limit: capacity, closed: false },
+        2: { limit: capacity, closed: false },
+        3: { limit: capacity, closed: false },
+        4: { limit: capacity, closed: false },
+        5: { limit: capacity, closed: false },
+        6: { limit: capacity, closed: false }
+      }
+    };
+  }
+
+  function friendlyAuthError(error, fallback) {
+    const message = String(error?.message || "").toLowerCase();
+
+    if (message.includes("already registered") || message.includes("already been registered")) {
+      return "An online account already exists for that email. Tap Sign In instead.";
+    }
+    if (message.includes("invalid login credentials")) {
+      return "The email or password is incorrect.";
+    }
+    if (message.includes("password") && message.includes("least")) {
+      return "Use a password with at least 6 characters.";
+    }
+    if (message.includes("rate limit")) {
+      return "Too many attempts were made. Wait a moment and try again.";
+    }
+    if (message.includes("failed to fetch") || message.includes("network")) {
+      return "GroomBook could not connect online. Check your internet connection and try again.";
+    }
+
+    return error?.message || fallback;
+  }
+
+  async function initAuth() {
     const landingPage = document.getElementById("landingPage");
     const startTrialBtn = document.getElementById("startTrialBtn");
     const landingLoginBtn = document.getElementById("landingLoginBtn");
@@ -296,12 +338,16 @@
       return;
     }
 
-    const style = document.createElement("style");
-    style.id = "gbAuthStyles";
-    style.textContent = authStyles;
-    document.head.appendChild(style);
+    if (!document.getElementById("gbAuthStyles")) {
+      const style = document.createElement("style");
+      style.id = "gbAuthStyles";
+      style.textContent = authStyles;
+      document.head.appendChild(style);
+    }
 
-    document.body.insertAdjacentHTML("beforeend", authMarkup);
+    if (!document.getElementById("gbSignupScreen")) {
+      document.body.insertAdjacentHTML("beforeend", authMarkup);
+    }
 
     const signupScreen = document.getElementById("gbSignupScreen");
     const loginScreen = document.getElementById("gbLoginScreen");
@@ -313,12 +359,36 @@
     const loginSubmit = document.getElementById("gbLoginSubmit");
 
     const header = document.querySelector(".header");
-    const signOutButton = document.createElement("button");
-    signOutButton.type = "button";
-    signOutButton.className = "gb-signout-btn";
-    signOutButton.id = "gbSignOutBtn";
-    signOutButton.textContent = "Sign Out";
-    header?.appendChild(signOutButton);
+    let signOutButton = document.getElementById("gbSignOutBtn");
+    if (!signOutButton) {
+      signOutButton = document.createElement("button");
+      signOutButton.type = "button";
+      signOutButton.className = "gb-signout-btn";
+      signOutButton.id = "gbSignOutBtn";
+      signOutButton.textContent = "Sign Out";
+      header?.appendChild(signOutButton);
+    }
+
+    let supabaseClient = null;
+    let activeUser = null;
+    let activeProfile = null;
+
+    const clientReady = loadSupabaseLibrary().then(library => {
+      supabaseClient = library.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+          }
+        }
+      );
+
+      window.groomBookSupabase = supabaseClient;
+      return supabaseClient;
+    });
 
     function showError(element, message) {
       element.textContent = message;
@@ -363,56 +433,24 @@
       closeAuthScreens();
       landingPage.style.display = "flex";
       signOutButton.classList.remove("show");
+      activeUser = null;
+      activeProfile = null;
+      window.groomBookCurrentUser = null;
+      window.groomBookCurrentProfile = null;
       window.scrollTo(0, 0);
     }
 
-    function showApp(account) {
-      closeAuthScreens();
-      landingPage.style.display = "none";
-      signOutButton.classList.add("show");
-      applyAccountToApp(account);
-      window.scrollTo(0, 0);
-    }
-
-    function normalizeEmail(value) {
-      return String(value || "").trim().toLowerCase();
-    }
-
-    function readAccount() {
-      try {
-        const saved = localStorage.getItem(ACCOUNT_KEY);
-        return saved ? JSON.parse(saved) : null;
-      } catch (error) {
-        console.error("Unable to read GroomBook account:", error);
-        return null;
-      }
-    }
-
-    async function hashPassword(password) {
-      if (window.crypto?.subtle && window.TextEncoder) {
-        const bytes = new TextEncoder().encode(password);
-        const digest = await window.crypto.subtle.digest("SHA-256", bytes);
-        return Array.from(new Uint8Array(digest))
-          .map(byte => byte.toString(16).padStart(2, "0"))
-          .join("");
-      }
-
-      return btoa(unescape(encodeURIComponent(password)));
-    }
-
-    function createCapacitySettings(dailyCapacity) {
-      const capacity = Math.max(1, Math.min(100, Number(dailyCapacity) || 10));
+    function normalizeProfile(profile, user) {
+      const metadata = user?.user_metadata || {};
       return {
-        mode: "pets",
-        weekdays: {
-          0: { limit: 0, closed: true },
-          1: { limit: capacity, closed: false },
-          2: { limit: capacity, closed: false },
-          3: { limit: capacity, closed: false },
-          4: { limit: capacity, closed: false },
-          5: { limit: capacity, closed: false },
-          6: { limit: capacity, closed: false }
-        }
+        id: profile?.id || user?.id || "",
+        businessName: profile?.business_name || metadata.business_name || "GroomBook",
+        ownerName: profile?.owner_name || metadata.owner_name || "Owner",
+        email: profile?.email || user?.email || "",
+        phone: profile?.phone || metadata.phone || "",
+        dailyCapacity: Number(profile?.daily_capacity || metadata.daily_capacity || 10),
+        subscriptionStatus: profile?.subscription_status || "trial",
+        trialEndsAt: profile?.trial_ends_at || null
       };
     }
 
@@ -430,6 +468,17 @@
           : "Pet grooming appointments and history";
       }
 
+      const capacity = createCapacitySettings(account.dailyCapacity);
+      localStorage.setItem(CAPACITY_KEY, JSON.stringify(capacity));
+
+      try {
+        if (typeof capacitySettings !== "undefined") {
+          capacitySettings = capacity;
+        }
+      } catch (error) {
+        console.warn("Capacity settings will refresh on the next page load.", error);
+      }
+
       if (typeof updateGreeting === "function") {
         updateGreeting();
       }
@@ -437,6 +486,75 @@
       if (typeof renderAll === "function") {
         renderAll();
       }
+    }
+
+    function showApp(account, user) {
+      closeAuthScreens();
+      landingPage.style.display = "none";
+      signOutButton.classList.add("show");
+      activeUser = user;
+      activeProfile = account;
+      window.groomBookCurrentUser = user;
+      window.groomBookCurrentProfile = account;
+      applyAccountToApp(account);
+      document.dispatchEvent(new CustomEvent("groombook:auth-ready", {
+        detail: { client: supabaseClient, user, profile: account }
+      }));
+      window.scrollTo(0, 0);
+    }
+
+    async function fetchBusinessProfile(user) {
+      const client = await clientReady;
+      const { data, error } = await client
+        .from("businesses")
+        .select("id,business_name,owner_name,email,phone,daily_capacity,subscription_status,trial_ends_at")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    }
+
+    async function ensureBusinessProfile(user, values = {}) {
+      const client = await clientReady;
+      const metadata = user.user_metadata || {};
+      const payload = {
+        id: user.id,
+        business_name: values.businessName || metadata.business_name || "GroomBook",
+        owner_name: values.ownerName || metadata.owner_name || "Owner",
+        email: normalizeEmail(user.email || values.email),
+        phone: values.phone || metadata.phone || null,
+        daily_capacity: Math.max(
+          1,
+          Math.min(100, Number(values.dailyCapacity || metadata.daily_capacity || 10))
+        )
+      };
+
+      const { data, error } = await client
+        .from("businesses")
+        .upsert(payload, { onConflict: "id" })
+        .select("id,business_name,owner_name,email,phone,daily_capacity,subscription_status,trial_ends_at")
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return data;
+    }
+
+    async function openOnlineSession(user, fallbackValues = {}) {
+      let profile = await fetchBusinessProfile(user);
+      if (!profile) {
+        profile = await ensureBusinessProfile(user, fallbackValues);
+      }
+
+      const normalized = normalizeProfile(profile, user);
+      showApp(normalized, user);
+      return normalized;
     }
 
     startTrialBtn.addEventListener("click", event => {
@@ -473,63 +591,64 @@
         showError(signupError, "Complete all required fields.");
         return;
       }
-
       if (!email.includes("@")) {
         showError(signupError, "Enter a valid email address.");
         return;
       }
-
       if (!Number.isFinite(dailyCapacity) || dailyCapacity < 1 || dailyCapacity > 100) {
         showError(signupError, "Daily capacity must be between 1 and 100.");
         return;
       }
-
       if (password.length < 6) {
         showError(signupError, "Password must contain at least 6 characters.");
         return;
       }
-
       if (password !== confirmPassword) {
         showError(signupError, "The two passwords do not match.");
         return;
       }
 
-      const existingAccount = readAccount();
-      if (existingAccount) {
-        showError(signupError, "An account already exists on this device. Tap Sign In below.");
-        return;
-      }
-
       signupSubmit.disabled = true;
-      signupSubmit.textContent = "Creating Account...";
+      signupSubmit.textContent = "Creating Online Account...";
 
       try {
-        const account = {
+        const client = await clientReady;
+        const { data, error } = await client.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              business_name: businessName,
+              owner_name: ownerName,
+              phone,
+              daily_capacity: String(dailyCapacity)
+            }
+          }
+        });
+
+        if (error) {
+          throw error;
+        }
+        if (!data.user) {
+          throw new Error("The online account was not created.");
+        }
+
+        await openOnlineSession(data.user, {
           businessName,
           ownerName,
           email,
           phone,
-          dailyCapacity,
-          passwordHash: await hashPassword(password),
-          createdAt: new Date().toISOString()
-        };
-
-        localStorage.setItem(ACCOUNT_KEY, JSON.stringify(account));
-        localStorage.setItem(SESSION_KEY, email);
-
-        const newCapacitySettings = createCapacitySettings(dailyCapacity);
-        localStorage.setItem(CAPACITY_KEY, JSON.stringify(newCapacitySettings));
-
-        if (typeof capacitySettings !== "undefined") {
-          capacitySettings = newCapacitySettings;
-        }
+          dailyCapacity
+        });
 
         signupForm.reset();
         document.getElementById("gbDailyCapacity").value = "10";
-        showApp(account);
       } catch (error) {
-        console.error("Unable to create GroomBook account:", error);
-        showError(signupError, "The account could not be created. Please try again.");
+        console.error("Unable to create GroomBook online account:", error);
+        showError(
+          signupError,
+          friendlyAuthError(error, "The online account could not be created. Please try again.")
+        );
       } finally {
         signupSubmit.disabled = false;
         signupSubmit.textContent = "Start My Free Trial";
@@ -543,50 +662,83 @@
       const formData = new FormData(loginForm);
       const email = normalizeEmail(formData.get("email"));
       const password = String(formData.get("password") || "");
-      const account = readAccount();
 
-      if (!account) {
-        showError(loginError, "No account is saved on this device. Start a free trial first.");
+      if (!email || !password) {
+        showError(loginError, "Enter your email and password.");
         return;
       }
 
       loginSubmit.disabled = true;
-      loginSubmit.textContent = "Signing In...";
+      loginSubmit.textContent = "Signing In Online...";
 
       try {
-        const passwordHash = await hashPassword(password);
-        const emailMatches = email === normalizeEmail(account.email);
-        const passwordMatches = passwordHash === account.passwordHash;
+        const client = await clientReady;
+        const { data, error } = await client.auth.signInWithPassword({
+          email,
+          password
+        });
 
-        if (!emailMatches || !passwordMatches) {
-          showError(loginError, "The email or password is incorrect.");
-          return;
+        if (error) {
+          throw error;
+        }
+        if (!data.user) {
+          throw new Error("The online account could not be opened.");
         }
 
-        localStorage.setItem(SESSION_KEY, account.email);
+        await openOnlineSession(data.user);
         loginForm.reset();
-        showApp(account);
       } catch (error) {
-        console.error("Unable to sign in:", error);
-        showError(loginError, "Sign in failed. Please try again.");
+        console.error("Unable to sign in to GroomBook:", error);
+        showError(
+          loginError,
+          friendlyAuthError(error, "Sign in failed. Please try again.")
+        );
       } finally {
         loginSubmit.disabled = false;
         loginSubmit.textContent = "Sign In";
       }
     });
 
-    signOutButton.addEventListener("click", () => {
-      localStorage.removeItem(SESSION_KEY);
-      showLanding();
+    signOutButton.addEventListener("click", async () => {
+      signOutButton.disabled = true;
+      signOutButton.textContent = "Signing Out...";
+
+      try {
+        const client = await clientReady;
+        const { error } = await client.auth.signOut();
+        if (error) {
+          throw error;
+        }
+        showLanding();
+      } catch (error) {
+        console.error("Unable to sign out:", error);
+        alert("GroomBook could not sign out. Check your connection and try again.");
+      } finally {
+        signOutButton.disabled = false;
+        signOutButton.textContent = "Sign Out";
+      }
     });
 
-    const account = readAccount();
-    const activeSession = normalizeEmail(localStorage.getItem(SESSION_KEY));
+    window.groomBookAuth = {
+      getClient: async () => clientReady,
+      getUser: () => activeUser,
+      getProfile: () => activeProfile
+    };
 
-    if (account && activeSession === normalizeEmail(account.email)) {
-      showApp(account);
-    } else {
-      localStorage.removeItem(SESSION_KEY);
+    try {
+      const client = await clientReady;
+      const { data, error } = await client.auth.getUser();
+      if (error) {
+        throw error;
+      }
+
+      if (data.user) {
+        await openOnlineSession(data.user);
+      } else {
+        showLanding();
+      }
+    } catch (error) {
+      console.error("GroomBook online authentication did not initialize:", error);
       showLanding();
     }
   }
