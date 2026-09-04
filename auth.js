@@ -736,6 +736,53 @@
     document.getElementById("gbGoToLogin").addEventListener("click", openLogin);
     document.getElementById("gbGoToSignup").addEventListener("click", openSignup);
 
+  document.getElementById("gbForgotPassword").addEventListener("click", async () => {
+  clearErrors();
+
+  const email = normalizeEmail(
+    document.getElementById("gbLoginEmail").value
+  );
+
+  if (!email) {
+    showError(
+      loginError,
+      "Enter your email address first, then tap Forgot password?"
+    );
+    return;
+  }
+
+  try {
+    const client = await clientReady;
+
+    const { error } = await client.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: window.location.origin + window.location.pathname
+      }
+    );
+
+    if (error) {
+      throw error;
+    }
+
+    showError(
+      loginError,
+      "Password reset email sent. Check your inbox and spam folder."
+    );
+
+  } catch (error) {
+    console.error("Unable to send password reset email:", error);
+
+    showError(
+      loginError,
+      friendlyAuthError(
+        error,
+        "Password reset email could not be sent. Please try again."
+      )
+    );
+  }
+});
+    
     signupForm.addEventListener("submit", async event => {
       event.preventDefault();
       clearErrors();
