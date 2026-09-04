@@ -320,12 +320,21 @@
           </div>
 
           <div>
-            <label for="gbLoginPassword">Password</label>
-            <input id="gbLoginPassword" name="password" type="password" autocomplete="current-password" required placeholder="Enter your password">
-          </div>
+  <label for="gbLoginPassword">Password</label>
+  <input id="gbLoginPassword" name="password" type="password" autocomplete="current-password" required placeholder="Enter your password">
+</div>
 
-          <div class="gb-auth-error" id="gbLoginError" role="alert"></div>
+<div style="text-align:right; margin-top:-7px;">
+  <button
+    class="gb-auth-link"
+    id="gbForgotPassword"
+    type="button"
+  >
+    Forgot password?
+  </button>
+</div>
 
+<div class="gb-auth-error" id="gbLoginError" role="alert"></div>
           <button class="gb-auth-primary" id="gbLoginSubmit" type="submit">Sign In</button>
           <button class="gb-auth-secondary" id="gbLoginBack" type="button">Back</button>
         </form>
